@@ -1,0 +1,1 @@
+/Library/Developer/CommandLineTools/usr/bin/c++ -g -dynamiclib -Wl,-headerpad_max_install_names  -o libPISSD_dynamic.dylib -install_name @rpath/libPISSD_dynamic.dylib CMakeFiles/PISSD_dynamic.dir/PISSD.cpp.o -lcryptopp 
