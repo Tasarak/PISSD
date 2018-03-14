@@ -6,9 +6,9 @@
 
 #IncludeRegexTransform: 
 
-/Users/kuba/CLionProjects/libPISSD/PISSD.cpp
+D:/VUT/BP/libPISSD/PISSD.cpp
 PISSD.h
-/Users/kuba/CLionProjects/libPISSD/PISSD.h
+D:/VUT/BP/libPISSD/PISSD.h
 iostream
 -
 iomanip
@@ -50,7 +50,7 @@ cryptopp/hex.h
 cryptopp/eax.h
 -
 
-/Users/kuba/CLionProjects/libPISSD/PISSD.h
+D:/VUT/BP/libPISSD/PISSD.h
 string
 -
 

@@ -12,6 +12,5 @@ link_libraries(cryptopp)
 # List of source files
 set(libsrc PISSD.cpp PISSD.h)
 
-
 add_library(PISSD_static STATIC ${libsrc})
 add_library(PISSD SHARED ${libsrc})

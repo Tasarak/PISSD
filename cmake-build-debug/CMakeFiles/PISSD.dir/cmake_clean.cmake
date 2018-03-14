@@ -1,7 +1,9 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/PISSD.dir/PISSD.cpp.o"
+  "CMakeFiles/PISSD.dir/PISSD.cpp.obj"
   "libPISSD.pdb"
-  "libPISSD.dylib"
+  "libPISSD.dll"
+  "libPISSD.dll.a"
+  "libPISSD.dll.manifest"
 )
 
 # Per-language clean rules from dependency scanning.

@@ -8,133 +8,133 @@
 		<Option virtualFolders="CMake Files\;"/>
 		<Build>
 			<Target title="all">
-				<Option working_dir="/Users/kuba/CLionProjects/libPISSD/cmake-build-debug"/>
+				<Option working_dir="D:/VUT/BP/libPISSD/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="rebuild_cache">
-				<Option working_dir="/Users/kuba/CLionProjects/libPISSD/cmake-build-debug"/>
-				<Option type="4"/>
-				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="edit_cache">
-				<Option working_dir="/Users/kuba/CLionProjects/libPISSD/cmake-build-debug"/>
-				<Option type="4"/>
-				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="PISSD">
-				<Option output="/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/libPISSD.dylib" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/Users/kuba/CLionProjects/libPISSD/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="3"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/9.0.0/include"/>
-					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
-					<Add directory="/usr/include"/>
-					<Add directory="/System/Library/Frameworks"/>
-					<Add directory="/Library/Frameworks"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 PISSD"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="PISSD/fast">
-				<Option output="/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/libPISSD.dylib" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/Users/kuba/CLionProjects/libPISSD/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="3"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/9.0.0/include"/>
-					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
-					<Add directory="/usr/include"/>
-					<Add directory="/System/Library/Frameworks"/>
-					<Add directory="/Library/Frameworks"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 PISSD/fast"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="PISSD_static">
-				<Option output="/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/libPISSD_static.a" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/Users/kuba/CLionProjects/libPISSD/cmake-build-debug"/>
+				<Option output="D:/VUT/BP/libPISSD/cmake-build-debug/libPISSD_static.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="D:/VUT/BP/libPISSD/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="2"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/9.0.0/include"/>
-					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
-					<Add directory="/usr/include"/>
-					<Add directory="/System/Library/Frameworks"/>
-					<Add directory="/Library/Frameworks"/>
+					<Add directory="D:/Programy/MinGW/include"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../include/c++/4.8.3"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../include/c++/4.8.3/x86_64-w64-mingw32"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../include/c++/4.8.3/backward"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/include"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/include-fixed"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../x86_64-w64-mingw32/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 PISSD_static"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 PISSD_static"/>
+					<CompileFile command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="PISSD_static/fast">
-				<Option output="/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/libPISSD_static.a" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/Users/kuba/CLionProjects/libPISSD/cmake-build-debug"/>
+				<Option output="D:/VUT/BP/libPISSD/cmake-build-debug/libPISSD_static.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="D:/VUT/BP/libPISSD/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="2"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/9.0.0/include"/>
-					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
-					<Add directory="/usr/include"/>
-					<Add directory="/System/Library/Frameworks"/>
-					<Add directory="/Library/Frameworks"/>
+					<Add directory="D:/Programy/MinGW/include"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../include/c++/4.8.3"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../include/c++/4.8.3/x86_64-w64-mingw32"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../include/c++/4.8.3/backward"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/include"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/include-fixed"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../x86_64-w64-mingw32/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 PISSD_static/fast"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 PISSD_static/fast"/>
+					<CompileFile command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="PISSD">
+				<Option output="D:/VUT/BP/libPISSD/cmake-build-debug/libPISSD.dll" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="D:/VUT/BP/libPISSD/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="D:/Programy/MinGW/include"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../include/c++/4.8.3"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../include/c++/4.8.3/x86_64-w64-mingw32"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../include/c++/4.8.3/backward"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/include"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/include-fixed"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../x86_64-w64-mingw32/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 PISSD"/>
+					<CompileFile command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="PISSD/fast">
+				<Option output="D:/VUT/BP/libPISSD/cmake-build-debug/libPISSD.dll" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="D:/VUT/BP/libPISSD/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="D:/Programy/MinGW/include"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../include/c++/4.8.3"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../include/c++/4.8.3/x86_64-w64-mingw32"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../include/c++/4.8.3/backward"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/include"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/include-fixed"/>
+					<Add directory="d:\programy\mingw\bin\../lib64/gcc/x86_64-w64-mingw32/4.8.3/../../../../x86_64-w64-mingw32/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 PISSD/fast"/>
+					<CompileFile command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="D:/VUT/BP/libPISSD/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="D:/VUT/BP/libPISSD/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/Programy/MinGW/bin/mingw32-make.exe -f &quot;D:/VUT/BP/libPISSD/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/Users/kuba/CLionProjects/libPISSD/PISSD.cpp">
-			<Option target="PISSD"/>
+		<Unit filename="D:/VUT/BP/libPISSD/PISSD.cpp">
 			<Option target="PISSD_static"/>
-		</Unit>
-		<Unit filename="/Users/kuba/CLionProjects/libPISSD/PISSD.h">
 			<Option target="PISSD"/>
-			<Option target="PISSD_static"/>
 		</Unit>
-		<Unit filename="/Users/kuba/CLionProjects/libPISSD/CMakeLists.txt">
+		<Unit filename="D:/VUT/BP/libPISSD/PISSD.h">
+			<Option target="PISSD_static"/>
+			<Option target="PISSD"/>
+		</Unit>
+		<Unit filename="D:/VUT/BP/libPISSD/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
 	</Project>

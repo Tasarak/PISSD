@@ -3,7 +3,14 @@
 
 #include <string>
 
-int storeUserData(std::string *key, std::string *data);
-int retrieveUserData(std::string *key, std::string *data);
-
+namespace PISSD
+{
+    class SecureDataStorage
+    {
+    public:
+        int storeUserData(const std::string &key, std::string &data);
+        int retrieveUserData(const std::string &key, std::string &data);
+        void deleteStoredData(std::string &key);
+    };
+}
 #endif

@@ -1,3 +1,4 @@
+ToolSet: w64 3.3@D:\Programy\MinGW
 Options: 
 
 Options:

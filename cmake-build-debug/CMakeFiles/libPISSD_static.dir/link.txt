@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc liblibPISSD_static.a  CMakeFiles/libPISSD_static.dir/library.cpp.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib liblibPISSD_static.a
