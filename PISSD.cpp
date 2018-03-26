@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <boost/filesystem.hpp>
 
 #ifdef WIN32
 
@@ -264,35 +265,39 @@ int loadFile(std::string data[], std::string fileName)
     return 0;
 }
 
-std::string decrypthData(std::string dataKey, std::string data)
+void initializeKeyAndIV(const std::string &dataKey, CryptoPP::byte key[], CryptoPP::byte iv[])
 {
-    CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_BLOCKSIZE];
-
-    std::string ciphertext = data;
-    std::string decryptedtext;
-
+    CryptoPP::SecByteBlock derived(64);
     std::string password = getUsername() + getUUID() + dataKey;
     unsigned int iterations = 1000;
 
-    CryptoPP::SecByteBlock derived(64);
-
     CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA256> kdf;
-    kdf.DeriveKey(derived.data(), derived.size(), 0, (CryptoPP::byte *) password.data(), password.size(), nullptr,
-                  0, iterations);
+    kdf.DeriveKey(derived.data(), derived.size(), 0,
+                  (CryptoPP::byte *) password.data(),
+                  password.size(), nullptr, 0, iterations);
 
     memcpy(key, derived.data(), CryptoPP::AES::MAX_KEYLENGTH);
     memcpy(iv, derived.data() + CryptoPP::AES::MAX_KEYLENGTH, CryptoPP::AES::MAX_BLOCKSIZE);
+}
+
+std::string decrypthData(std::string dataKey, std::string cipherText)
+{
+    CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_BLOCKSIZE];
+
+    std::string decryptedText;
+
+    initializeKeyAndIV(dataKey, key, iv);
 
     CryptoPP::AES::Decryption aesDecryption(key, CryptoPP::AES::MAX_KEYLENGTH);
     CryptoPP::CBC_Mode_ExternalCipher::Decryption cbcDecryption(aesDecryption, iv);
 
-    CryptoPP::StreamTransformationFilter stfDecryptor(cbcDecryption, new CryptoPP::StringSink(decryptedtext));
-    stfDecryptor.Put(reinterpret_cast<const unsigned char *>( ciphertext.c_str()), ciphertext.size());
+    CryptoPP::StreamTransformationFilter stfDecryptor(cbcDecryption, new CryptoPP::StringSink(decryptedText));
+    stfDecryptor.Put(reinterpret_cast<const unsigned char *>( cipherText.c_str()), cipherText.size());
     stfDecryptor.MessageEnd();
 
-    decryptedtext.erase(decryptedtext.end() - SALTSIZE - 1, decryptedtext.end());
+    decryptedText.erase(decryptedText.end() - SALTSIZE - 1, decryptedText.end());
 
-    return decryptedtext;
+    return decryptedText;
 
 }
 
@@ -333,41 +338,146 @@ std::string findSameStrings(std::vector<std::string> possibleData)
     return "";
 }
 
+void encryptData(std::string &plaintext, std::string &ciphertext, CryptoPP::byte key[], CryptoPP::byte iv[])
+{
+    CryptoPP::AES::Encryption aesEncryption(key, CryptoPP::AES::MAX_KEYLENGTH);
+    CryptoPP::CBC_Mode_ExternalCipher::Encryption cbcEncryption(aesEncryption, iv);
+
+    CryptoPP::StreamTransformationFilter stfEncryptor(cbcEncryption, new CryptoPP::StringSink(ciphertext));
+    stfEncryptor.Put(reinterpret_cast<const unsigned char *>( plaintext.c_str()), plaintext.length() + 1);
+    stfEncryptor.MessageEnd();
+}
+
+void generateSalt(std::string &salt)
+{
+    CryptoPP::SecByteBlock saltGen(SALTSIZE);
+    CryptoPP::OS_GenerateRandomBlock(true, saltGen, saltGen.size());
+
+    std::string saltString((char *) saltGen.data(), saltGen.size());
+    salt = saltString;
+}
+
+
+
 namespace PISSD
 {
 
-    int SecureDataStorage::storeUserData(const std::string &dataKey, std::string &data)
+    int SecureDataStorage::storeData(const std::string &dataKey, std::string &data)
     {
-        CryptoPP::RandomPool prng;
-        CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_BLOCKSIZE];
+        CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
 
-        CryptoPP::SecByteBlock salt(SALTSIZE), derived(64);
-        CryptoPP::OS_GenerateRandomBlock(true, salt, salt.size());
+        CryptoPP::SecByteBlock derived(64);
 
-        std::string saltString((char *) salt.data(), salt.size());
+        std::string saltString;
+        generateSalt(saltString);
 
-        std::string password = getUsername() + getUUID() + dataKey;
-        unsigned int iterations = 1000;
-
-        CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA256> kdf;
-        kdf.DeriveKey(derived.data(), derived.size(), 0, (CryptoPP::byte *) password.data(), password.size(), nullptr,
-                      0, iterations);
-
-        memcpy(key, derived.data(), CryptoPP::AES::MAX_KEYLENGTH);
-        memcpy(iv, derived.data() + CryptoPP::AES::MAX_KEYLENGTH, CryptoPP::AES::MAX_BLOCKSIZE);
-
-
-        std::string plaintext = data;
+        std::string plaintext = "str" + data;
         std::string ciphertext;
 
-        plaintext += saltString;
+        plaintext += SHA512HashString(plaintext) + saltString;
 
-        CryptoPP::AES::Encryption aesEncryption(key, CryptoPP::AES::MAX_KEYLENGTH);
-        CryptoPP::CBC_Mode_ExternalCipher::Encryption cbcEncryption(aesEncryption, iv);
+        initializeKeyAndIV(dataKey, key, iv);
 
-        CryptoPP::StreamTransformationFilter stfEncryptor(cbcEncryption, new CryptoPP::StringSink(ciphertext));
-        stfEncryptor.Put(reinterpret_cast<const unsigned char *>( plaintext.c_str()), plaintext.length() + 1);
-        stfEncryptor.MessageEnd();
+        encryptData(plaintext, ciphertext, key, iv);
+
+        createFile(dataKey.c_str(), ciphertext);
+
+        return 0;
+    }
+
+    int SecureDataStorage::storeData(const std::string &dataKey, double &data)
+    {
+        CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
+
+        CryptoPP::SecByteBlock derived(64);
+
+        std::string saltString;
+        generateSalt(saltString);
+
+        std::string plaintext = "dbl" + std::to_string(data);
+        std::string ciphertext;
+
+        plaintext += SHA512HashString(plaintext) + saltString;
+
+        initializeKeyAndIV(dataKey, key, iv);
+
+        encryptData(plaintext, ciphertext, key, iv);
+
+        createFile(dataKey.c_str(), ciphertext);
+
+        return 0;
+    }
+
+    int SecureDataStorage::storeData(const std::string &dataKey, float &data)
+    {
+        CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
+
+        CryptoPP::SecByteBlock derived(64);
+
+        std::string saltString;
+        generateSalt(saltString);
+
+        std::string plaintext = "flt" + std::to_string(data);
+        std::string ciphertext;
+
+        plaintext += SHA512HashString(plaintext) + saltString;
+
+        initializeKeyAndIV(dataKey, key, iv);
+
+        encryptData(plaintext, ciphertext, key, iv);
+
+        createFile(dataKey.c_str(), ciphertext);
+
+        return 0;
+    }
+
+    int SecureDataStorage::storeData(const std::string &dataKey, int64_t &data)
+    {
+        CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
+
+        CryptoPP::SecByteBlock derived(64);
+
+        std::string saltString;
+        generateSalt(saltString);
+
+        std::string plaintext = "int" + std::to_string(data);
+        std::string ciphertext;
+
+        plaintext += SHA512HashString(plaintext) + saltString;
+
+        initializeKeyAndIV(dataKey, key, iv);
+
+        encryptData(plaintext, ciphertext, key, iv);
+
+        createFile(dataKey.c_str(), ciphertext);
+
+        return 0;
+    }
+
+    int SecureDataStorage::storeData(const std::string &dataKey, bool &data)
+    {
+        CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
+
+        CryptoPP::SecByteBlock derived(64);
+
+        std::string saltString;
+        generateSalt(saltString);
+
+        std::string plaintext = "bol";
+        if (data)
+        {
+            plaintext += "true";
+        } else
+        {
+            plaintext += "false";
+        }
+        std::string ciphertext;
+
+        plaintext += SHA512HashString(plaintext) + saltString;
+
+        initializeKeyAndIV(dataKey, key, iv);
+
+        encryptData(plaintext, ciphertext, key, iv);
 
         createFile(dataKey.c_str(), ciphertext);
 
@@ -375,12 +485,10 @@ namespace PISSD
     }
 
 
-    int SecureDataStorage::retrieveUserData(const std::string &dataKey, std::string &data)
+    int SecureDataStorage::retrieveData(const std::string &dataKey, std::string &data)
     {
-
         std::string dataToRead[3];
         std::string temp[3];
-        std::string final[3];
 
         std::vector<std::string> possibleData;
 
@@ -395,7 +503,11 @@ namespace PISSD
                     if (checkHash(temp[i]) == 0)
                     {
                         temp[i].erase(temp[i].end() - 90, temp[i].end());
-                        possibleData.push_back(temp[i]);
+                        if (temp[i].substr(0, 3) == "str")
+                        {
+                            temp[i].erase(0, 3);
+                            possibleData.push_back(temp[i]);
+                        }
                     }
                 }
             } else
@@ -416,14 +528,191 @@ namespace PISSD
         return 0;
     }
 
-    void SecureDataStorage::deleteStoredData(std::string &key)
+    int SecureDataStorage::retrieveData(const std::string &dataKey, double &data)
+    {
+        std::string dataToRead[3];
+        std::string temp[3];
+
+        std::vector<std::string> possibleData;
+
+        int loadedFileCheck = loadFile(dataToRead, dataKey);
+        if (loadedFileCheck == 0)
+        {
+            if (compareCiphertext(dataToRead) > 1)
+            {
+                for (int i = 0; i < 3; ++i)
+                {
+                    temp[i] = decrypthData(dataKey, dataToRead[i]);
+                    if (checkHash(temp[i]) == 0)
+                    {
+                        temp[i].erase(temp[i].end() - 90, temp[i].end());
+                        if (temp[i].substr(0, 3) == "dbl")
+                        {
+                            temp[i].erase(0, 3);
+                            possibleData.push_back(temp[i]);
+                        }
+                    }
+                }
+            } else
+            {
+
+            }
+        }
+
+        if (loadedFileCheck == 3 || possibleData.empty())
+        {
+            std::cerr << "No file found\n";
+            return -1;
+        }
+
+        data = std::stod(findSameStrings(possibleData));
+
+        return 0;
+    }
+
+    int SecureDataStorage::retrieveData(const std::string &dataKey, float &data)
+    {
+        std::string dataToRead[3];
+        std::string temp[3];
+
+        std::vector<std::string> possibleData;
+
+        int loadedFileCheck = loadFile(dataToRead, dataKey);
+        if (loadedFileCheck == 0)
+        {
+            if (compareCiphertext(dataToRead) > 1)
+            {
+                for (int i = 0; i < 3; ++i)
+                {
+                    temp[i] = decrypthData(dataKey, dataToRead[i]);
+                    if (checkHash(temp[i]) == 0)
+                    {
+                        temp[i].erase(temp[i].end() - 90, temp[i].end());
+                        if (temp[i].substr(0, 3) == "flt")
+                        {
+                            temp[i].erase(0, 3);
+                            possibleData.push_back(temp[i]);
+                        }
+                    }
+                }
+            } else
+            {
+
+            }
+        }
+
+        if (loadedFileCheck == 3 || possibleData.empty())
+        {
+            std::cerr << "No file found\n";
+            return -1;
+        }
+
+        data = std::stof(findSameStrings(possibleData));
+
+        return 0;
+    }
+
+    int SecureDataStorage::retrieveData(const std::string &dataKey, int64_t &data)
+    {
+        std::string dataToRead[3];
+        std::string temp[3];
+
+        std::vector<std::string> possibleData;
+
+        int loadedFileCheck = loadFile(dataToRead, dataKey);
+        if (loadedFileCheck == 0)
+        {
+            if (compareCiphertext(dataToRead) > 1)
+            {
+                for (int i = 0; i < 3; ++i)
+                {
+                    temp[i] = decrypthData(dataKey, dataToRead[i]);
+                    if (checkHash(temp[i]) == 0)
+                    {
+                        temp[i].erase(temp[i].end() - 90, temp[i].end());
+                        if (temp[i].substr(0, 3) == "flt")
+                        {
+                            temp[i].erase(0, 3);
+                            possibleData.push_back(temp[i]);
+                        }
+                    }
+                }
+            } else
+            {
+
+            }
+        }
+
+        if (loadedFileCheck == 3 || possibleData.empty())
+        {
+            std::cerr << "No file found\n";
+            return -1;
+        }
+
+        data = std::stoll(findSameStrings(possibleData));
+
+        return 0;
+    }
+
+    int SecureDataStorage::retrieveData(const std::string &dataKey, bool &data)
+    {
+        std::string dataToRead[3];
+        std::string temp[3];
+
+        std::vector<std::string> possibleData;
+
+        int loadedFileCheck = loadFile(dataToRead, dataKey);
+        if (loadedFileCheck == 0)
+        {
+            if (compareCiphertext(dataToRead) > 1)
+            {
+                for (int i = 0; i < 3; ++i)
+                {
+                    temp[i] = decrypthData(dataKey, dataToRead[i]);
+                    if (checkHash(temp[i]) == 0)
+                    {
+                        temp[i].erase(temp[i].end() - 90, temp[i].end());
+                        if (temp[i].substr(0, 3) == "bol")
+                        {
+                            temp[i].erase(0, 3);
+                            possibleData.push_back(temp[i]);
+                        }
+                    }
+                }
+            } else
+            {
+
+            }
+        }
+
+        if (loadedFileCheck == 3 || possibleData.empty())
+        {
+            std::cerr << "No file found\n";
+            return -1;
+        }
+
+        if (findSameStrings(possibleData) == "true")
+        {
+            data = true;
+        } else if (findSameStrings(possibleData) == "false")
+        {
+            data = false;
+        } else
+        {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    void SecureDataStorage::deleteStoredData(std::string &dataKey)
     {
         std::string pathsToFile[3];
 
         getDirPath(pathsToFile);
         for (auto &path : pathsToFile)
         {
-            path += "/." + key + ".jkl";
+            path += "/." + dataKey + ".jkl";
 #ifdef WIN32
             DeleteFile(path.c_str());
 #endif

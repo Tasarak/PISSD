@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/PISSD_static.dir/PISSD.cpp.obj"
+  "CMakeFiles/PISSD_static.dir/PISSD.cpp.o"
   "libPISSD_static.pdb"
   "libPISSD_static.a"
 )

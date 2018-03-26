@@ -1,2 +1,2 @@
-D:\Programy\MinGW\bin\ar.exe qc libPISSD_static.a  CMakeFiles/PISSD_static.dir/PISSD.cpp.obj
-D:\Programy\MinGW\bin\ranlib.exe libPISSD_static.a
+/Library/Developer/CommandLineTools/usr/bin/ar qc libPISSD_static.a  CMakeFiles/PISSD_static.dir/PISSD.cpp.o
+/Library/Developer/CommandLineTools/usr/bin/ranlib libPISSD_static.a

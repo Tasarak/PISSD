@@ -1,4 +1,4 @@
-D:/VUT/BP/libPISSD/cmake-build-debug/CMakeFiles/PISSD_static.dir
-D:/VUT/BP/libPISSD/cmake-build-debug/CMakeFiles/PISSD.dir
-D:/VUT/BP/libPISSD/cmake-build-debug/CMakeFiles/edit_cache.dir
-D:/VUT/BP/libPISSD/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/CMakeFiles/PISSD.dir
+/Users/kuba/CLionProjects/libPISSD/cmake-build-debug/CMakeFiles/PISSD_static.dir

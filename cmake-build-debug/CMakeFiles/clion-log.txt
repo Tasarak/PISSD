@@ -1,18 +1,5 @@
-"C:\Program Files\JetBrains\CLion 2017.3.3\bin\cmake\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" D:\VUT\BP\libPISSD
--- The C compiler identification is GNU 4.8.3
--- The CXX compiler identification is GNU 4.8.3
--- Check for working C compiler: D:/Programy/MinGW/bin/gcc.exe
--- Check for working C compiler: D:/Programy/MinGW/bin/gcc.exe -- works
--- Detecting C compiler ABI info
--- Detecting C compiler ABI info - done
--- Detecting C compile features
--- Detecting C compile features - done
--- Check for working CXX compiler: D:/Programy/MinGW/bin/g++.exe
--- Check for working CXX compiler: D:/Programy/MinGW/bin/g++.exe -- works
--- Detecting CXX compiler ABI info
--- Detecting CXX compiler ABI info - done
--- Detecting CXX compile features
--- Detecting CXX compile features - done
+/Applications/CLion.app/Contents/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /Users/kuba/CLionProjects/libPISSD
+-- Boost version: 1.66.0
 -- Configuring done
 -- Generating done
--- Build files have been written to: D:/VUT/BP/libPISSD/cmake-build-debug
+-- Build files have been written to: /Users/kuba/CLionProjects/libPISSD/cmake-build-debug
