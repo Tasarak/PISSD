@@ -3,10 +3,9 @@ project(libPISSD)
 
 set(CMAKE_CXX_STANDARD 11)
 
-find_package(Boost 1.57.0)
-if(NOT Boost_FOUND)
-    message(FATAL_ERROR "Could not find Boost!")
-endif()
+find_package(Boost 1.55.0 COMPONENTS system filesystem REQUIRED)
+link_libraries(${Boost_FILESYSTEM_LIBRARY})
+link_libraries(${Boost_SYSTEM_LIBRARY})
 
 if (WIN32)
     link_libraries(shlwapi)
