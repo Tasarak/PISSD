@@ -1,9 +1,9 @@
 #include "PISSD.h"
-
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 #include <boost/filesystem.hpp>
+#include <boost/foreach.hpp>
 
 #ifdef WIN32
 
@@ -35,7 +35,6 @@
 
 #define SALTSIZE 32
 
-
 std::string SHA512HashString(std::string const aString)
 {
     std::string digest;
@@ -46,6 +45,13 @@ std::string SHA512HashString(std::string const aString)
                                                         new CryptoPP::Base64Encoder(new CryptoPP::StringSink(digest))));
 
     return digest;
+}
+
+std::string stripExtension(std::string fileName)
+{
+    fileName.erase(0, 1);
+    fileName.erase(fileName.end()-4, fileName.end());
+    return fileName;
 }
 
 std::string getUsername()
@@ -122,19 +128,36 @@ void getDirPath(std::string pathNames[])
 
     if (stat(configPath.c_str(), &st) == -1)
     {
-        mkdir(configPath.c_str(), 0700);
+        mkpath_np(configPath.c_str(), 0700);
     }
 
     if (stat(documentsPath.c_str(), &st) == -1)
     {
-        mkdir(documentsPath.c_str(), 0700);
+        mkpath_np(documentsPath.c_str(), 0700);
     }
 
     if (stat(libraryPath.c_str(), &st) == -1)
     {
-        mkdir(libraryPath.c_str(), 0700);
+        mkpath_np(libraryPath.c_str(), 0700);
     }
 #endif
+}
+
+void addModuleToPath(std::string module, std::string paths[])
+{
+    if (module.find('/') != 0)
+    {
+        module = '/' + module;
+    }
+
+    if (module.back() == '/')
+    {
+        module.erase(module.size());
+    }
+    for (int i = 0; i < 3; i++)
+    {
+        paths[i] += module;
+    }
 }
 
 void createFile(std::string fileName, std::string data)
@@ -159,7 +182,32 @@ void createFile(std::string fileName, std::string data)
     {
         SetFileAttributes(pathNames[i].c_str(), FILE_ATTRIBUTE_HIDDEN);
     }
+#endif
+}
 
+void createFile(std::string module, std::string fileName, std::string data)
+{
+    std::string pathNames[3];
+    getDirPath(pathNames);
+    addModuleToPath(module, pathNames);
+
+    for (int i = 0; i < 3; ++i)
+    {
+        pathNames[i].append("/." + fileName + ".jkl");
+#ifdef WIN32
+        DeleteFile(pathNames[i].c_str());
+#endif
+        std::ofstream outFile(pathNames[i], std::ios::out | std::ios::binary);
+        outFile << data;
+        outFile.close();
+    }
+
+#ifdef WIN32
+
+    for (int i = 0; i < 3; ++i)
+    {
+        SetFileAttributes(pathNames[i].c_str(), FILE_ATTRIBUTE_HIDDEN);
+    }
 #endif
 }
 
@@ -227,10 +275,51 @@ int compareCiphertext(std::string data[])
 
 int loadFile(std::string data[], std::string fileName)
 {
-    std::string dirPath[6];
+    std::string dirPath[3];
     int emptyFileCounter = 0;
 
     getDirPath(dirPath);
+
+    for (int i = 0; i < 3; ++i)
+    {
+
+        dirPath[i].append("/." + fileName + ".jkl");
+        std::ifstream infile(dirPath[i], std::ifstream::binary);
+        if (infile.is_open())
+        {
+            std::string str((std::istreambuf_iterator<char>(infile)),
+                            std::istreambuf_iterator<char>());
+            infile.close();
+
+            data[i] = str;
+        }
+
+        if (data[i].empty())
+        {
+            emptyFileCounter++;
+        }
+    }
+
+    if (emptyFileCounter == 3)
+    {
+        return 2;
+    }
+
+    if (emptyFileCounter == 2)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+int loadFile(std::string module, std::string data[], std::string fileName)
+{
+    std::string dirPath[3];
+    int emptyFileCounter = 0;
+
+    getDirPath(dirPath);
+    addModuleToPath(module, dirPath);
 
     for (int i = 0; i < 3; ++i)
     {
@@ -357,11 +446,27 @@ void generateSalt(std::string &salt)
     salt = saltString;
 }
 
+void createPath(std::string &pathToDir, const std::string &module, const std::string &name)
+{
+    if (module.front() == '/')
+    {
+        pathToDir += module;
+    } else
+    {
+        pathToDir += "/" + module;
+    }
 
+    if (module.back() == '/')
+    {
+        pathToDir += name;
+    } else
+    {
+        pathToDir += "/" + name;
+    }
+}
 
 namespace PISSD
 {
-
     int SecureDataStorage::storeData(const std::string &dataKey, std::string &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
@@ -514,6 +619,22 @@ namespace PISSD
             {
 
             }
+        } else if (loadedFileCheck < 3)
+        {
+            std::string temp;
+            for (int i = 0; i < loadedFileCheck; ++i)
+            {
+                temp = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp) == 0)
+                {
+                    temp.erase(temp.end() - 90, temp.end());
+                    if (temp.substr(0, 3) == "str")
+                    {
+                        temp.erase(0, 3);
+                        possibleData.push_back(temp);
+                    }
+                }
+            }
         }
 
         if (loadedFileCheck == 3 || possibleData.empty())
@@ -557,6 +678,22 @@ namespace PISSD
             {
 
             }
+        } else if (loadedFileCheck < 3)
+        {
+            std::string temp;
+            for (int i = 0; i < loadedFileCheck; ++i)
+            {
+                temp = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp) == 0)
+                {
+                    temp.erase(temp.end() - 90, temp.end());
+                    if (temp.substr(0, 3) == "dbl")
+                    {
+                        temp.erase(0, 3);
+                        possibleData.push_back(temp);
+                    }
+                }
+            }
         }
 
         if (loadedFileCheck == 3 || possibleData.empty())
@@ -599,6 +736,22 @@ namespace PISSD
             {
 
             }
+        } else if (loadedFileCheck < 3)
+        {
+            std::string temp;
+            for (int i = 0; i < loadedFileCheck; ++i)
+            {
+                temp = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp) == 0)
+                {
+                    temp.erase(temp.end() - 90, temp.end());
+                    if (temp.substr(0, 3) == "flt")
+                    {
+                        temp.erase(0, 3);
+                        possibleData.push_back(temp);
+                    }
+                }
+            }
         }
 
         if (loadedFileCheck == 3 || possibleData.empty())
@@ -630,7 +783,7 @@ namespace PISSD
                     if (checkHash(temp[i]) == 0)
                     {
                         temp[i].erase(temp[i].end() - 90, temp[i].end());
-                        if (temp[i].substr(0, 3) == "flt")
+                        if (temp[i].substr(0, 3) == "int")
                         {
                             temp[i].erase(0, 3);
                             possibleData.push_back(temp[i]);
@@ -640,6 +793,22 @@ namespace PISSD
             } else
             {
 
+            }
+        } else if (loadedFileCheck < 3)
+        {
+            std::string temp;
+            for (int i = 0; i < loadedFileCheck; ++i)
+            {
+                temp = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp) == 0)
+                {
+                    temp.erase(temp.end() - 90, temp.end());
+                    if (temp.substr(0, 3) == "int")
+                    {
+                        temp.erase(0, 3);
+                        possibleData.push_back(temp);
+                    }
+                }
             }
         }
 
@@ -683,6 +852,22 @@ namespace PISSD
             {
 
             }
+        } else if (loadedFileCheck < 3)
+        {
+            std::string temp;
+            for (int i = 0; i < loadedFileCheck; ++i)
+            {
+                temp = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp) == 0)
+                {
+                    temp.erase(temp.end() - 90, temp.end());
+                    if (temp.substr(0, 3) == "bol")
+                    {
+                        temp.erase(0, 3);
+                        possibleData.push_back(temp);
+                    }
+                }
+            }
         }
 
         if (loadedFileCheck == 3 || possibleData.empty())
@@ -720,5 +905,720 @@ namespace PISSD
             std::remove(path.c_str());
 #endif
         }
+    }
+
+    void SecureDataStorage::deleteAllData()
+    {
+        boost::filesystem::path boostPath;
+        std::string dirPath[3];
+
+        getDirPath(dirPath);
+        for (int i = 0; i < 3; ++i)
+        {
+            boostPath = dirPath[i] + "/";
+            boost::filesystem::remove_all(boostPath);
+        }
+    }
+
+    int SecureDataStorage::createModule(const std::string &path, const std::string &name)
+    {
+        std::string dirPath[3];
+        struct stat st = {0};
+
+        getDirPath(dirPath);
+        if (path == "*" || path.empty())
+        {
+            for (int i = 0; i < 3; ++i)
+            {
+                dirPath[i] += "/" + name;
+
+                if (stat(dirPath[i].c_str(), &st) == -1)
+                {
+                    mkdir(dirPath[i].c_str() ,0700);
+                }
+            }
+        } else
+        {
+            for (int i = 0; i < 3; ++i)
+            {
+                createPath(dirPath[i], path, name);
+
+                if (stat(dirPath[i].c_str(), &st) == -1)
+                {
+                    mkpath_np(dirPath[i].c_str() ,0700);
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    int SecureDataStorage::removeModule(const std::string &path)
+    {
+        boost::filesystem::path boostPath;
+        std::string dirPath[3];
+
+        getDirPath(dirPath);
+        for (int i = 0; i < 3; ++i)
+        {
+            boostPath = dirPath[i] + "/" + path;
+            boost::filesystem::remove_all(boostPath);
+        }
+        return 0;
+    }
+
+    void SecureDataStorage::deleteAllDataFromModule(std::string &path)
+    {
+        boost::filesystem::path boostPath;
+        std::string dirPath[3];
+
+        getDirPath(dirPath);
+        for (int i = 0; i < 3; ++i)
+        {
+            boostPath = dirPath[i] + "/" + path;
+            boost::filesystem::remove(boostPath);
+        }
+    }
+
+    void SecureDataStorage::getAllKeys(std::vector<std::string> &paths, std::vector<std::string> &keys)
+    {
+        std::string dirPath[3];
+        getDirPath(dirPath);
+
+        std::vector<std::string> lPaths[3], lKeys[3];
+        for (int i = 0; i < 3; ++i)
+        {
+            boost::filesystem::path targetDir = dirPath[i];
+            boost::filesystem::recursive_directory_iterator it( targetDir ), eod;
+
+
+            BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod))
+                        {
+                            if(is_regular_file(p))
+                            {
+                                if (p.filename().string() != ".DS_Store")
+                                {
+                                    std::string filepath = p.branch_path().string();
+                                    filepath.erase(0, dirPath[i].size());
+                                    lPaths[i].push_back(filepath);
+                                    lKeys[i].push_back(stripExtension(p.filename().string()));
+                                }
+                            }
+                        }
+        }
+
+        int max = 0;
+        for (int i = 0; i < 3; ++i)
+        {
+            for (int j = i; j < 3; ++j)
+            {
+                if (lPaths[i].size() == lPaths[j].size())
+                {
+                    paths = lPaths[i];
+                    keys = lKeys[i];
+                    return;
+                } else if (lPaths[i].size() > lPaths[j].size())
+                {
+                    max = i;
+                } else
+                {
+                    max = j;
+                }
+            }
+        }
+        paths = lPaths[max];
+        keys = lKeys[max];
+    }
+
+    void SecureDataStorage::getAllModules(std::vector<std::string> &modules)
+    {
+        std::string dirPath[3];
+        getDirPath(dirPath);
+
+        for (int i = 0; i < 3; ++i)
+        {
+            boost::filesystem::path targetDir = dirPath[i];
+            boost::filesystem::recursive_directory_iterator it( targetDir ), eod;
+
+            BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod))
+                        {
+                            if(is_directory(p))
+                            {
+                                std::string modulePath = p.generic_path().string();
+                                modulePath.erase(0, dirPath[i].size() + 1);
+                                modules.push_back(modulePath);
+                            }
+                        }
+        }
+    }
+
+    void SecureDataStorage::getAllSubmodules(std::string path, std::vector<std::string> &modules)
+    {
+        std::string dirPath[3];
+        getDirPath(dirPath);
+
+        for (int i = 0; i < 3; ++i)
+        {
+            boost::filesystem::path targetDir = dirPath[i];
+            boost::filesystem::recursive_directory_iterator it( targetDir ), eod;
+
+            BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod))
+                        {
+                            if(is_directory(p))
+                            {
+                                std::string modulePath = p.generic_path().string();
+                                modulePath.erase(0, dirPath[i].size() + 1);
+                                if (modulePath.find(path) != std::string::npos)
+                                {
+                                    modules.push_back(modulePath);
+                                }
+                            }
+                        }
+        }
+    }
+
+    bool SecureDataStorage::contains(const std::string &dataKey)
+    {
+        std::vector<std::string> paths, keys;
+        getAllKeys(paths, keys);
+        for (auto key : keys)
+        {
+            if (key == dataKey)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void SecureDataStorage::getAllKeysFromModule(std::string module,
+                                                 std::vector<std::string> &paths,
+                                                 std::vector<std::string> &keys)
+    {
+        std::string dirPath[3];
+        getDirPath(dirPath);
+
+        std::vector<std::string> lPaths[3], lKeys[3];
+        for (int i = 0; i < 3; ++i)
+        {
+            boost::filesystem::path targetDir = dirPath[i];
+            boost::filesystem::recursive_directory_iterator it( targetDir ), eod;
+
+
+            BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod))
+                        {
+                            if(is_regular_file(p))
+                            {
+                                if (p.filename().string() != ".DS_Store")
+                                {
+                                    std::string filepath = p.branch_path().string();
+                                    filepath.erase(0, dirPath[i].size());
+                                    if (filepath.find(module) != std::string::npos)
+                                    {
+                                        lPaths[i].push_back(filepath);
+                                        lKeys[i].push_back(stripExtension(p.filename().string()));
+                                    }
+                                }
+                            }
+                        }
+        }
+
+        int max = 0;
+        for (int i = 0; i < 3; ++i)
+        {
+            for (int j = i; j < 3; ++j)
+            {
+                if (lPaths[i].size() == lPaths[j].size())
+                {
+                    paths = lPaths[i];
+                    keys = lKeys[i];
+                    return;
+                } else if (lPaths[i].size() > lPaths[j].size())
+                {
+                    max = i;
+                } else
+                {
+                    max = j;
+                }
+            }
+        }
+        paths = lPaths[max];
+        keys = lKeys[max];
+    }
+
+    void SecureDataStorage::getDirectKeysFromModule(std::string module,
+                                                    std::vector<std::string> &paths,
+                                                    std::vector<std::string> &keys)
+    {
+        std::string dirPath[3];
+        getDirPath(dirPath);
+
+        std::vector<std::string> lPaths[3], lKeys[3];
+        for (int i = 0; i < 3; ++i)
+        {
+            boost::filesystem::path targetDir = dirPath[i];
+            boost::filesystem::recursive_directory_iterator it( targetDir ), eod;
+
+
+            BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod))
+                        {
+                            if(is_regular_file(p))
+                            {
+                                if (p.filename().string() != ".DS_Store")
+                                {
+                                    std::string filepath = p.branch_path().string();
+                                    filepath.erase(0, dirPath[i].size());
+                                    if (std::equal(module.rbegin(), module.rend(), filepath.rbegin()))
+                                    {
+                                        lPaths[i].push_back(filepath);
+                                        lKeys[i].push_back(stripExtension(p.filename().string()));
+                                    }
+                                }
+                            }
+                        }
+        }
+
+        int max = 0;
+        for (int i = 0; i < 3; ++i)
+        {
+            for (int j = i; j < 3; ++j)
+            {
+                if (lPaths[i].size() == lPaths[j].size())
+                {
+                    paths = lPaths[i];
+                    keys = lKeys[i];
+                    return;
+                } else if (lPaths[i].size() > lPaths[j].size())
+                {
+                    max = i;
+                } else
+                {
+                    max = j;
+                }
+            }
+        }
+        paths = lPaths[max];
+        keys = lKeys[max];
+    }
+
+    int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, std::string &data)
+    {
+        CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
+
+        CryptoPP::SecByteBlock derived(64);
+
+        std::string saltString;
+        generateSalt(saltString);
+
+        std::string plaintext = "str" + data;
+        std::string ciphertext;
+
+        plaintext += SHA512HashString(plaintext) + saltString;
+
+        initializeKeyAndIV(dataKey, key, iv);
+
+        encryptData(plaintext, ciphertext, key, iv);
+
+        createFile(module, dataKey.c_str(), ciphertext);
+
+        return 0;
+    }
+
+    int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, double &data)
+    {
+        CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
+
+        CryptoPP::SecByteBlock derived(64);
+
+        std::string saltString;
+        generateSalt(saltString);
+
+        std::string plaintext = "dbl" + std::to_string(data);
+        std::string ciphertext;
+
+        plaintext += SHA512HashString(plaintext) + saltString;
+
+        initializeKeyAndIV(dataKey, key, iv);
+
+        encryptData(plaintext, ciphertext, key, iv);
+
+        createFile(module, dataKey.c_str(), ciphertext);
+
+        return 0;
+    }
+
+    int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, float &data)
+    {
+        CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
+
+        CryptoPP::SecByteBlock derived(64);
+
+        std::string saltString;
+        generateSalt(saltString);
+
+        std::string plaintext = "flt" + std::to_string(data);
+        std::string ciphertext;
+
+        plaintext += SHA512HashString(plaintext) + saltString;
+
+        initializeKeyAndIV(dataKey, key, iv);
+
+        encryptData(plaintext, ciphertext, key, iv);
+
+        createFile(module, dataKey.c_str(), ciphertext);
+
+        return 0;
+    }
+
+    int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, int64_t &data)
+    {
+        CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
+
+        CryptoPP::SecByteBlock derived(64);
+
+        std::string saltString;
+        generateSalt(saltString);
+
+        std::string plaintext = "int" + std::to_string(data);
+        std::string ciphertext;
+
+        plaintext += SHA512HashString(plaintext) + saltString;
+
+        initializeKeyAndIV(dataKey, key, iv);
+
+        encryptData(plaintext, ciphertext, key, iv);
+
+        createFile(module, dataKey.c_str(), ciphertext);
+
+        return 0;
+    }
+
+    int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, bool &data)
+    {
+        CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
+
+        CryptoPP::SecByteBlock derived(64);
+
+        std::string saltString;
+        generateSalt(saltString);
+
+        std::string plaintext = "bol";
+        if (data)
+        {
+            plaintext += "true";
+        } else
+        {
+            plaintext += "false";
+        }
+
+        std::string ciphertext;
+
+        plaintext += SHA512HashString(plaintext) + saltString;
+
+        initializeKeyAndIV(dataKey, key, iv);
+
+        encryptData(plaintext, ciphertext, key, iv);
+
+        createFile(module, dataKey.c_str(), ciphertext);
+
+        return 0;
+    }
+
+    int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, std::string &data)
+    {
+        std::string dataToRead[3];
+
+        std::vector<std::string> possibleData;
+
+        int loadedFileCheck = loadFile(module, dataToRead, dataKey);
+        if (loadedFileCheck == 0)
+        {
+            if (compareCiphertext(dataToRead) > 1)
+            {
+                std::string temp[3];
+                for (int i = 0; i < 3; ++i)
+                {
+                    temp[i] = decrypthData(dataKey, dataToRead[i]);
+                    if (checkHash(temp[i]) == 0)
+                    {
+                        temp[i].erase(temp[i].end() - 90, temp[i].end());
+                        if (temp[i].substr(0, 3) == "str")
+                        {
+                            temp[i].erase(0, 3);
+                            possibleData.push_back(temp[i]);
+                        }
+                    }
+                }
+            } else
+            {
+
+            }
+        } else if (loadedFileCheck < 3)
+        {
+            std::string temp;
+            for (int i = 0; i < loadedFileCheck; ++i)
+            {
+                temp = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp) == 0)
+                {
+                    temp.erase(temp.end() - 90, temp.end());
+                    if (temp.substr(0, 3) == "str")
+                    {
+                        temp.erase(0, 3);
+                        possibleData.push_back(temp);
+                    }
+                }
+            }
+        }
+
+        if (loadedFileCheck == 3 || possibleData.empty())
+        {
+            std::cerr << "No file found\n";
+            data = "";
+            return -1;
+        }
+
+        data = findSameStrings(possibleData);
+
+        return 0;
+    }
+
+    int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, double &data)
+    {
+        std::string dataToRead[3];
+
+        std::vector<std::string> possibleData;
+
+        int loadedFileCheck = loadFile(module, dataToRead, dataKey);
+        if (loadedFileCheck == 0)
+        {
+            if (compareCiphertext(dataToRead) > 1)
+            {
+                std::string temp[3];
+                for (int i = 0; i < 3; ++i)
+                {
+                    temp[i] = decrypthData(dataKey, dataToRead[i]);
+                    if (checkHash(temp[i]) == 0)
+                    {
+                        temp[i].erase(temp[i].end() - 90, temp[i].end());
+                        if (temp[i].substr(0, 3) == "dbl")
+                        {
+                            temp[i].erase(0, 3);
+                            possibleData.push_back(temp[i]);
+                        }
+                    }
+                }
+            } else
+            {
+
+            }
+        } else if (loadedFileCheck < 3)
+        {
+            std::string temp;
+            for (int i = 0; i < loadedFileCheck; ++i)
+            {
+                temp = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp) == 0)
+                {
+                    temp.erase(temp.end() - 90, temp.end());
+                    if (temp.substr(0, 3) == "dbl")
+                    {
+                        temp.erase(0, 3);
+                        possibleData.push_back(temp);
+                    }
+                }
+            }
+        }
+
+        if (loadedFileCheck == 3 || possibleData.empty())
+        {
+            std::cerr << "No file found\n";
+            return -1;
+        }
+
+        data = std::stod(findSameStrings(possibleData));
+        return 0;
+    }
+
+    int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, float &data)
+    {
+        std::string dataToRead[3];
+
+        std::vector<std::string> possibleData;
+
+        int loadedFileCheck = loadFile(module, dataToRead, dataKey);
+        if (loadedFileCheck == 0)
+        {
+            if (compareCiphertext(dataToRead) > 1)
+            {
+                std::string temp[3];
+                for (int i = 0; i < 3; ++i)
+                {
+                    temp[i] = decrypthData(dataKey, dataToRead[i]);
+                    if (checkHash(temp[i]) == 0)
+                    {
+                        temp[i].erase(temp[i].end() - 90, temp[i].end());
+                        if (temp[i].substr(0, 3) == "flt")
+                        {
+                            temp[i].erase(0, 3);
+                            possibleData.push_back(temp[i]);
+                        }
+                    }
+                }
+            } else
+            {
+
+            }
+        } else if (loadedFileCheck < 3)
+        {
+            std::string temp;
+            for (int i = 0; i < loadedFileCheck; ++i)
+            {
+                temp = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp) == 0)
+                {
+                    temp.erase(temp.end() - 90, temp.end());
+                    if (temp.substr(0, 3) == "flt")
+                    {
+                        temp.erase(0, 3);
+                        possibleData.push_back(temp);
+                    }
+                }
+            }
+        }
+
+        if (loadedFileCheck == 3 || possibleData.empty())
+        {
+            std::cerr << "No file found\n";
+            return -1;
+        }
+
+        data = std::stof(findSameStrings(possibleData));
+        return 0;
+    }
+
+    int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, int64_t &data)
+    {
+        std::string dataToRead[3];
+
+        std::vector<std::string> possibleData;
+
+        int loadedFileCheck = loadFile(module, dataToRead, dataKey);
+        if (loadedFileCheck == 0)
+        {
+            if (compareCiphertext(dataToRead) > 1)
+            {
+                std::string temp[3];
+                for (int i = 0; i < 3; ++i)
+                {
+                    temp[i] = decrypthData(dataKey, dataToRead[i]);
+                    if (checkHash(temp[i]) == 0)
+                    {
+                        temp[i].erase(temp[i].end() - 90, temp[i].end());
+                        if (temp[i].substr(0, 3) == "int")
+                        {
+                            temp[i].erase(0, 3);
+                            possibleData.push_back(temp[i]);
+                        }
+                    }
+                }
+            } else
+            {
+
+            }
+        } else if (loadedFileCheck < 3)
+        {
+            std::string temp;
+            for (int i = 0; i < loadedFileCheck; ++i)
+            {
+                temp = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp) == 0)
+                {
+                    temp.erase(temp.end() - 90, temp.end());
+                    if (temp.substr(0, 3) == "int")
+                    {
+                        temp.erase(0, 3);
+                        possibleData.push_back(temp);
+                    }
+                }
+            }
+        }
+
+        if (loadedFileCheck == 3 || possibleData.empty())
+        {
+            std::cerr << "No file found\n";
+            return -1;
+        }
+
+        data = std::stoll(findSameStrings(possibleData));
+        return 0;
+    }
+
+    int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, bool &data)
+    {
+        std::string dataToRead[3];
+
+        std::vector<std::string> possibleData;
+
+        int loadedFileCheck = loadFile(module, dataToRead, dataKey);
+        if (loadedFileCheck == 0)
+        {
+            if (compareCiphertext(dataToRead) > 1)
+            {
+                std::string temp[3];
+                for (int i = 0; i < 3; ++i)
+                {
+                    temp[i] = decrypthData(dataKey, dataToRead[i]);
+                    if (checkHash(temp[i]) == 0)
+                    {
+                        temp[i].erase(temp[i].end() - 90, temp[i].end());
+                        if (temp[i].substr(0, 3) == "bol")
+                        {
+                            temp[i].erase(0, 3);
+                            possibleData.push_back(temp[i]);
+                        }
+                    }
+                }
+            } else
+            {
+
+            }
+        } else if (loadedFileCheck < 3)
+        {
+            std::string temp;
+            for (int i = 0; i < loadedFileCheck; ++i)
+            {
+                temp = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp) == 0)
+                {
+                    temp.erase(temp.end() - 90, temp.end());
+                    if (temp.substr(0, 3) == "bol")
+                    {
+                        temp.erase(0, 3);
+                        possibleData.push_back(temp);
+                    }
+                }
+            }
+        }
+
+        if (loadedFileCheck == 3 || possibleData.empty())
+        {
+            std::cerr << "No file found\n";
+            return -1;
+        }
+
+        if (findSameStrings(possibleData) == "true")
+        {
+            data = true;
+        } else if (findSameStrings(possibleData) == "false")
+        {
+            data = false;
+        } else
+        {
+            return 1;
+        }
+
+        return 0;
     }
 }

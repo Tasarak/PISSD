@@ -20,18 +20,35 @@ namespace PISSD
         int retrieveData(const std::string &dataKey, int64_t &data);
         int retrieveData(const std::string &dataKey, bool &data);
 
+        int storeDataToModule(std::string module, const std::string &dataKey, std::string &data);
+        int storeDataToModule(std::string module, const std::string &dataKey, double &data);
+        int storeDataToModule(std::string module, const std::string &dataKey, float &data);
+        int storeDataToModule(std::string module, const std::string &dataKey, int64_t &data);
+        int storeDataToModule(std::string module, const std::string &dataKey, bool &data);
+
+        int retrieveDataFromModule(std::string module, const std::string &dataKey, std::string &data);
+        int retrieveDataFromModule(std::string module, const std::string &dataKey, double &data);
+        int retrieveDataFromModule(std::string module, const std::string &dataKey, float &data);
+        int retrieveDataFromModule(std::string module, const std::string &dataKey, int64_t &data);
+        int retrieveDataFromModule(std::string module, const std::string &dataKey, bool &data);
+
         void deleteStoredData(std::string &dataKey);
         void deleteAllData();
         void deleteAllDataFromModule(std::string &path);
 
-        void createModule(const std::string &path, const std::string &name);
-        void removeModule(const std::string &path);
-        void storeDataToModule();
-        void retrieveDataFromModule();
-        void getAllKeys();
-        void getKeysFromModule();
-        void getAllModules();
-        void getAllSubmodules();
+        int createModule(const std::string &path, const std::string &name);
+        int removeModule(const std::string &path);
+
+
+        void getAllKeys(std::vector<std::string> &paths, std::vector<std::string> &keys);
+        void getAllKeysFromModule(std::string module,
+                                  std::vector<std::string> &paths,
+                                  std::vector<std::string> &keys);
+        void getDirectKeysFromModule(std::string module,
+                                     std::vector<std::string> &paths,
+                                     std::vector<std::string> &keys);
+        void getAllModules(std::vector<std::string> &modules);
+        void getAllSubmodules(std::string path, std::vector<std::string> &modules);
         bool contains(const std::string &dataKey);
 
     };
