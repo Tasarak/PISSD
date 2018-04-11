@@ -1,4 +1,3 @@
-#include "PISSD.h"
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -32,6 +31,9 @@
 #include <cryptopp/pwdbased.h>
 #include <cryptopp/hex.h>
 #include <cryptopp/eax.h>
+
+#include "main.h"
+
 
 #define SALTSIZE 32
 
@@ -467,6 +469,11 @@ void createPath(std::string &pathToDir, const std::string &module, const std::st
 
 namespace PISSD
 {
+    SecureDataStorage::SecureDataStorage(std::mutex * mMutex)
+    {
+        lgMutex = mMutex;
+    }
+
     int SecureDataStorage::storeData(const std::string &dataKey, std::string &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
@@ -484,6 +491,7 @@ namespace PISSD
         initializeKeyAndIV(dataKey, key, iv);
 
         encryptData(plaintext, ciphertext, key, iv);
+        std::lock_guard<std::mutex> lock(*lgMutex);
 
         createFile(dataKey.c_str(), ciphertext);
 
@@ -508,6 +516,8 @@ namespace PISSD
 
         encryptData(plaintext, ciphertext, key, iv);
 
+        std::lock_guard<std::mutex> lock(*lgMutex);
+
         createFile(dataKey.c_str(), ciphertext);
 
         return 0;
@@ -531,6 +541,8 @@ namespace PISSD
 
         encryptData(plaintext, ciphertext, key, iv);
 
+        std::lock_guard<std::mutex> lock(*lgMutex);
+
         createFile(dataKey.c_str(), ciphertext);
 
         return 0;
@@ -553,6 +565,8 @@ namespace PISSD
         initializeKeyAndIV(dataKey, key, iv);
 
         encryptData(plaintext, ciphertext, key, iv);
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
 
         createFile(dataKey.c_str(), ciphertext);
 
@@ -584,6 +598,8 @@ namespace PISSD
 
         encryptData(plaintext, ciphertext, key, iv);
 
+        std::lock_guard<std::mutex> lock(*lgMutex);
+
         createFile(dataKey.c_str(), ciphertext);
 
         return 0;
@@ -594,8 +610,9 @@ namespace PISSD
     {
         std::string dataToRead[3];
         std::string temp[3];
-
         std::vector<std::string> possibleData;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
 
         int loadedFileCheck = loadFile(dataToRead, dataKey);
         if (loadedFileCheck == 0)
@@ -653,8 +670,9 @@ namespace PISSD
     {
         std::string dataToRead[3];
         std::string temp[3];
-
         std::vector<std::string> possibleData;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
 
         int loadedFileCheck = loadFile(dataToRead, dataKey);
         if (loadedFileCheck == 0)
@@ -711,8 +729,9 @@ namespace PISSD
     {
         std::string dataToRead[3];
         std::string temp[3];
-
         std::vector<std::string> possibleData;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
 
         int loadedFileCheck = loadFile(dataToRead, dataKey);
         if (loadedFileCheck == 0)
@@ -769,8 +788,9 @@ namespace PISSD
     {
         std::string dataToRead[3];
         std::string temp[3];
-
         std::vector<std::string> possibleData;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
 
         int loadedFileCheck = loadFile(dataToRead, dataKey);
         if (loadedFileCheck == 0)
@@ -827,8 +847,9 @@ namespace PISSD
     {
         std::string dataToRead[3];
         std::string temp[3];
-
         std::vector<std::string> possibleData;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
 
         int loadedFileCheck = loadFile(dataToRead, dataKey);
         if (loadedFileCheck == 0)
@@ -894,6 +915,7 @@ namespace PISSD
     {
         std::string pathsToFile[3];
 
+        std::lock_guard<std::mutex> lock(*lgMutex);
         getDirPath(pathsToFile);
         for (auto &path : pathsToFile)
         {
@@ -912,6 +934,7 @@ namespace PISSD
         boost::filesystem::path boostPath;
         std::string dirPath[3];
 
+        std::lock_guard<std::mutex> lock(*lgMutex);
         getDirPath(dirPath);
         for (int i = 0; i < 3; ++i)
         {
@@ -925,17 +948,19 @@ namespace PISSD
         std::string dirPath[3];
         struct stat st = {0};
 
+        std::lock_guard<std::mutex> lock(*lgMutex);
         getDirPath(dirPath);
         if (path == "*" || path.empty())
         {
             for (int i = 0; i < 3; ++i)
             {
                 dirPath[i] += "/" + name;
-
+#ifdef __APPLE__
                 if (stat(dirPath[i].c_str(), &st) == -1)
                 {
                     mkdir(dirPath[i].c_str() ,0700);
                 }
+#endif
             }
         } else
         {
@@ -943,10 +968,12 @@ namespace PISSD
             {
                 createPath(dirPath[i], path, name);
 
+#ifdef __APPLE__
                 if (stat(dirPath[i].c_str(), &st) == -1)
                 {
                     mkpath_np(dirPath[i].c_str() ,0700);
                 }
+#endif
             }
         }
 
@@ -958,6 +985,7 @@ namespace PISSD
         boost::filesystem::path boostPath;
         std::string dirPath[3];
 
+        std::lock_guard<std::mutex> lock(*lgMutex);
         getDirPath(dirPath);
         for (int i = 0; i < 3; ++i)
         {
@@ -972,6 +1000,7 @@ namespace PISSD
         boost::filesystem::path boostPath;
         std::string dirPath[3];
 
+        std::lock_guard<std::mutex> lock(*lgMutex);
         getDirPath(dirPath);
         for (int i = 0; i < 3; ++i)
         {
@@ -985,6 +1014,7 @@ namespace PISSD
         std::string dirPath[3];
         getDirPath(dirPath);
 
+        std::lock_guard<std::mutex> lock(*lgMutex);
         std::vector<std::string> lPaths[3], lKeys[3];
         for (int i = 0; i < 3; ++i)
         {
@@ -1035,6 +1065,7 @@ namespace PISSD
         std::string dirPath[3];
         getDirPath(dirPath);
 
+        std::lock_guard<std::mutex> lock(*lgMutex);
         for (int i = 0; i < 3; ++i)
         {
             boost::filesystem::path targetDir = dirPath[i];
@@ -1057,6 +1088,7 @@ namespace PISSD
         std::string dirPath[3];
         getDirPath(dirPath);
 
+        std::lock_guard<std::mutex> lock(*lgMutex);
         for (int i = 0; i < 3; ++i)
         {
             boost::filesystem::path targetDir = dirPath[i];
@@ -1080,6 +1112,8 @@ namespace PISSD
     bool SecureDataStorage::contains(const std::string &dataKey)
     {
         std::vector<std::string> paths, keys;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
         getAllKeys(paths, keys);
         for (auto key : keys)
         {
@@ -1088,7 +1122,6 @@ namespace PISSD
                 return true;
             }
         }
-
         return false;
     }
 
@@ -1099,6 +1132,7 @@ namespace PISSD
         std::string dirPath[3];
         getDirPath(dirPath);
 
+        std::lock_guard<std::mutex> lock(*lgMutex);
         std::vector<std::string> lPaths[3], lKeys[3];
         for (int i = 0; i < 3; ++i)
         {
@@ -1153,8 +1187,10 @@ namespace PISSD
     {
         std::string dirPath[3];
         getDirPath(dirPath);
-
         std::vector<std::string> lPaths[3], lKeys[3];
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
+
         for (int i = 0; i < 3; ++i)
         {
             boost::filesystem::path targetDir = dirPath[i];
@@ -1205,14 +1241,14 @@ namespace PISSD
     int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, std::string &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
-
         CryptoPP::SecByteBlock derived(64);
-
         std::string saltString;
+        std::string ciphertext;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
         generateSalt(saltString);
 
         std::string plaintext = "str" + data;
-        std::string ciphertext;
 
         plaintext += SHA512HashString(plaintext) + saltString;
 
@@ -1228,14 +1264,15 @@ namespace PISSD
     int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, double &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
-
         CryptoPP::SecByteBlock derived(64);
-
         std::string saltString;
+        std::string ciphertext;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
+
         generateSalt(saltString);
 
         std::string plaintext = "dbl" + std::to_string(data);
-        std::string ciphertext;
 
         plaintext += SHA512HashString(plaintext) + saltString;
 
@@ -1251,14 +1288,14 @@ namespace PISSD
     int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, float &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
-
         CryptoPP::SecByteBlock derived(64);
-
         std::string saltString;
+        std::string ciphertext;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
         generateSalt(saltString);
 
         std::string plaintext = "flt" + std::to_string(data);
-        std::string ciphertext;
 
         plaintext += SHA512HashString(plaintext) + saltString;
 
@@ -1274,14 +1311,14 @@ namespace PISSD
     int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, int64_t &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
-
         CryptoPP::SecByteBlock derived(64);
-
         std::string saltString;
+        std::string ciphertext;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
         generateSalt(saltString);
 
         std::string plaintext = "int" + std::to_string(data);
-        std::string ciphertext;
 
         plaintext += SHA512HashString(plaintext) + saltString;
 
@@ -1297,10 +1334,11 @@ namespace PISSD
     int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, bool &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
-
         CryptoPP::SecByteBlock derived(64);
-
         std::string saltString;
+        std::string ciphertext;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
         generateSalt(saltString);
 
         std::string plaintext = "bol";
@@ -1311,8 +1349,6 @@ namespace PISSD
         {
             plaintext += "false";
         }
-
-        std::string ciphertext;
 
         plaintext += SHA512HashString(plaintext) + saltString;
 
@@ -1328,8 +1364,9 @@ namespace PISSD
     int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, std::string &data)
     {
         std::string dataToRead[3];
-
         std::vector<std::string> possibleData;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
 
         int loadedFileCheck = loadFile(module, dataToRead, dataKey);
         if (loadedFileCheck == 0)
@@ -1387,8 +1424,9 @@ namespace PISSD
     int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, double &data)
     {
         std::string dataToRead[3];
-
         std::vector<std::string> possibleData;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
 
         int loadedFileCheck = loadFile(module, dataToRead, dataKey);
         if (loadedFileCheck == 0)
@@ -1444,8 +1482,9 @@ namespace PISSD
     int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, float &data)
     {
         std::string dataToRead[3];
-
         std::vector<std::string> possibleData;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
 
         int loadedFileCheck = loadFile(module, dataToRead, dataKey);
         if (loadedFileCheck == 0)
@@ -1501,8 +1540,9 @@ namespace PISSD
     int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, int64_t &data)
     {
         std::string dataToRead[3];
-
         std::vector<std::string> possibleData;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
 
         int loadedFileCheck = loadFile(module, dataToRead, dataKey);
         if (loadedFileCheck == 0)
@@ -1558,8 +1598,9 @@ namespace PISSD
     int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, bool &data)
     {
         std::string dataToRead[3];
-
         std::vector<std::string> possibleData;
+
+        std::lock_guard<std::mutex> lock(*lgMutex);
 
         int loadedFileCheck = loadFile(module, dataToRead, dataKey);
         if (loadedFileCheck == 0)

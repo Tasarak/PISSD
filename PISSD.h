@@ -2,12 +2,15 @@
 #define LIBPISSD_LIBRARY_H
 
 #include <string>
-
+#include <mutex>
 namespace PISSD
 {
     class SecureDataStorage
     {
+    private:
+        std::mutex * lgMutex;
     public:
+        SecureDataStorage(std::mutex *mMutex);
         int storeData(const std::string &dataKey, std::string &data);
         int storeData(const std::string &dataKey, double &data);
         int storeData(const std::string &dataKey, float &data);
@@ -38,7 +41,6 @@ namespace PISSD
 
         int createModule(const std::string &path, const std::string &name);
         int removeModule(const std::string &path);
-
 
         void getAllKeys(std::vector<std::string> &paths, std::vector<std::string> &keys);
         void getAllKeysFromModule(std::string module,
