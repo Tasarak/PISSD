@@ -32,7 +32,7 @@
 #include <cryptopp/hex.h>
 #include <cryptopp/eax.h>
 
-#include "main.h"
+#include "PISSD.h"
 
 
 #define SALTSIZE 32

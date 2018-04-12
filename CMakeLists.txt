@@ -11,11 +11,15 @@ if (WIN32)
 endif(WIN32)
 
 link_libraries(cryptopp)
+include_directories(cryptopp)
+link_directories(cryptopp)
 
 # List of source files
 set(libsrc PISSD.cpp PISSD.h)
 
-add_library(PISSD_static STATIC ${libsrc})
-add_library(PISSD SHARED ${libsrc})
+add_library(PISSD_static STATIC ${libsrc} ${Boost_LIBRARIES})
+add_library(PISSD SHARED ${libsrc} ${Boost_LIBRARIES})
 
+target_link_libraries(PISSD ${Boost_LIBRARIES} cryptopp)
+target_link_libraries(PISSD_static ${Boost_LIBRARIES} cryptopp)
 include_directories(${Boost_INCLUDE_DIR})
