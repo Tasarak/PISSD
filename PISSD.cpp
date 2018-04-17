@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <algorithm>
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 
@@ -54,6 +55,28 @@ std::string stripExtension(std::string fileName)
     fileName.erase(0, 1);
     fileName.erase(fileName.end()-4, fileName.end());
     return fileName;
+}
+
+bool checkPath(std::string filePath, std::string module)
+{
+    std::string delimiter = "/";
+    size_t pos = 0;
+    std::string token;
+    while ((pos = filePath.find(delimiter)) != std::string::npos)
+    {
+        token = filePath.substr(0, pos);
+        if (token == module)
+        {
+            return true;
+        }
+        filePath.erase(0, pos + delimiter.length());
+    }
+    if (filePath == module)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 std::string getUsername()
@@ -1023,18 +1046,18 @@ namespace PISSD
 
 
             BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod))
-                        {
-                            if(is_regular_file(p))
-                            {
-                                if (p.filename().string() != ".DS_Store")
-                                {
-                                    std::string filepath = p.branch_path().string();
-                                    filepath.erase(0, dirPath[i].size());
-                                    lPaths[i].push_back(filepath);
-                                    lKeys[i].push_back(stripExtension(p.filename().string()));
-                                }
-                            }
-                        }
+            {
+                if(is_regular_file(p))
+                {
+                    if (p.filename().string() != ".DS_Store")
+                    {
+                        std::string filepath = p.branch_path().string();
+                        filepath.erase(0, dirPath[i].size());
+                        lPaths[i].push_back(filepath);
+                        lKeys[i].push_back(stripExtension(p.filename().string()));
+                    }
+                }
+            }
         }
 
         int max = 0;
@@ -1072,15 +1095,17 @@ namespace PISSD
             boost::filesystem::recursive_directory_iterator it( targetDir ), eod;
 
             BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod))
-                        {
-                            if(is_directory(p))
-                            {
-                                std::string modulePath = p.generic_path().string();
-                                modulePath.erase(0, dirPath[i].size() + 1);
-                                modules.push_back(modulePath);
-                            }
-                        }
+            {
+                if(is_directory(p))
+                {
+                    std::string modulePath = p.generic_path().string();
+                    modulePath.erase(0, dirPath[i].size() + 1);
+                    modules.push_back(modulePath);
+                }
+            }
         }
+        std::sort(modules.begin(), modules.end());
+        modules.erase(std::unique(modules.begin(), modules.end()), modules.end());
     }
 
     void SecureDataStorage::getAllSubmodules(std::string path, std::vector<std::string> &modules)
@@ -1095,17 +1120,17 @@ namespace PISSD
             boost::filesystem::recursive_directory_iterator it( targetDir ), eod;
 
             BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod))
-                        {
-                            if(is_directory(p))
-                            {
-                                std::string modulePath = p.generic_path().string();
-                                modulePath.erase(0, dirPath[i].size() + 1);
-                                if (modulePath.find(path) != std::string::npos)
-                                {
-                                    modules.push_back(modulePath);
-                                }
-                            }
-                        }
+            {
+                if(is_directory(p))
+                {
+                    std::string modulePath = p.generic_path().string();
+                    modulePath.erase(0, dirPath[i].size() + 1);
+                    if (modulePath.find(path) != std::string::npos)
+                    {
+                        modules.push_back(modulePath);
+                    }
+                }
+            }
         }
     }
 
@@ -1141,21 +1166,21 @@ namespace PISSD
 
 
             BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod))
+            {
+                if(is_regular_file(p))
+                {
+                    if (p.filename().string() != ".DS_Store")
+                    {
+                        std::string filepath = p.branch_path().string();
+                        filepath.erase(0, dirPath[i].size() + 1);
+                        if (checkPath(filepath, module))
                         {
-                            if(is_regular_file(p))
-                            {
-                                if (p.filename().string() != ".DS_Store")
-                                {
-                                    std::string filepath = p.branch_path().string();
-                                    filepath.erase(0, dirPath[i].size());
-                                    if (filepath.find(module) != std::string::npos)
-                                    {
-                                        lPaths[i].push_back(filepath);
-                                        lKeys[i].push_back(stripExtension(p.filename().string()));
-                                    }
-                                }
-                            }
+                            lPaths[i].push_back(filepath);
+                            lKeys[i].push_back(stripExtension(p.filename().string()));
                         }
+                    }
+                }
+            }
         }
 
         int max = 0;
@@ -1198,21 +1223,21 @@ namespace PISSD
 
 
             BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod))
+            {
+                if(is_regular_file(p))
+                {
+                    if (p.filename().string() != ".DS_Store")
+                    {
+                        std::string filepath = p.branch_path().string();
+                        filepath.erase(0, dirPath[i].size());
+                        if (std::equal(module.rbegin(), module.rend(), filepath.rbegin()))
                         {
-                            if(is_regular_file(p))
-                            {
-                                if (p.filename().string() != ".DS_Store")
-                                {
-                                    std::string filepath = p.branch_path().string();
-                                    filepath.erase(0, dirPath[i].size());
-                                    if (std::equal(module.rbegin(), module.rend(), filepath.rbegin()))
-                                    {
-                                        lPaths[i].push_back(filepath);
-                                        lKeys[i].push_back(stripExtension(p.filename().string()));
-                                    }
-                                }
-                            }
+                            lPaths[i].push_back(filepath);
+                            lKeys[i].push_back(stripExtension(p.filename().string()));
                         }
+                    }
+                }
+            }
         }
 
         int max = 0;
