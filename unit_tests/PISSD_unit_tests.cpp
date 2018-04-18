@@ -1,7 +1,14 @@
 #include <iostream>
-#include <mutex>
 #include <algorithm>
+#include <vector>
+#include <mutex>
 #include <sys/stat.h>
+#include <unistd.h>
+
+#ifdef WIN32
+#include <Shlobj.h>
+#include <Shlwapi.h>
+#endif
 
 #include "../PISSD.h"
 #define CATCH_CONFIG_MAIN
@@ -15,12 +22,12 @@ void getPath(std::string &path)
     TCHAR szPath[MAX_PATH];
 
     if (SUCCEEDED(SHGetFolderPath(NULL,
-                                  CSIDL_APPDATA,
+                                  CSIDL_APPDATA | CSIDL_FLAG_CREATE,
                                   NULL,
                                   0,
                                   szPath)))
     {
-        std::string path = szPath;
+        path = szPath;
         path += "/PISSD";
     }
 #endif
@@ -46,14 +53,19 @@ bool folderExists(std::string module)
     std::string path;
     getPath(path);
     path += "/" + module;
-    struct stat info;
 
-    if(stat(path.c_str(), &info) != 0)
-        return false;
-    else if( info.st_mode & S_IFDIR )
-        return true;
-    else
-        return false;
+    if( !path.empty() )
+    {
+        if( access(path.c_str(), 0) == 0 )
+        {
+            struct stat status;
+            stat( path.c_str(), &status );
+            if( status.st_mode & S_IFDIR )
+                return true;
+        }
+    }
+    // if any condition fails
+    return false;
 }
 
 
@@ -314,4 +326,3 @@ TEST_CASE("Delete All Data")
     secureDataStorage.deleteAllData();
     REQUIRE_FALSE(folderExists(""));
 }
-

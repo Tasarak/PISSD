@@ -2,17 +2,18 @@
 #include <iomanip>
 #include <fstream>
 #include <algorithm>
+#include <string>
+#include <mutex>
+#include <vector>
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 
 #ifdef WIN32
 
-#include <windows.h>
 #include <Lmcons.h>
 #include <tchar.h>
 #include <Shlobj.h>
 #include <functional>
-#include <algorithm>
 
 #endif
 
@@ -981,8 +982,13 @@ namespace PISSD
 #ifdef __APPLE__
                 if (stat(dirPath[i].c_str(), &st) == -1)
                 {
-                    mkdir(dirPath[i].c_str() ,0700);
+                    mkpath_np(dirPath[i].c_str() ,0700);
                 }
+#endif
+
+#ifdef WIN32
+                CreateDirectory(dirPath[i].c_str(), NULL);
+                SetFileAttributes(dirPath[i].c_str(), FILE_ATTRIBUTE_HIDDEN);
 #endif
             }
         } else
@@ -996,6 +1002,11 @@ namespace PISSD
                 {
                     mkpath_np(dirPath[i].c_str() ,0700);
                 }
+#endif
+
+#ifdef WIN32
+                CreateDirectory(dirPath[i].c_str(), NULL);
+                SetFileAttributes(dirPath[i].c_str(), FILE_ATTRIBUTE_HIDDEN);
 #endif
             }
         }
