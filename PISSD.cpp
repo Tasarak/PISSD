@@ -406,9 +406,16 @@ std::string decrypthData(std::string dataKey, std::string cipherText)
     CryptoPP::AES::Decryption aesDecryption(key, CryptoPP::AES::MAX_KEYLENGTH);
     CryptoPP::CBC_Mode_ExternalCipher::Decryption cbcDecryption(aesDecryption, iv);
 
-    CryptoPP::StreamTransformationFilter stfDecryptor(cbcDecryption, new CryptoPP::StringSink(decryptedText));
-    stfDecryptor.Put(reinterpret_cast<const unsigned char *>( cipherText.c_str()), cipherText.size());
-    stfDecryptor.MessageEnd();
+    try
+    {
+        CryptoPP::StreamTransformationFilter stfDecryptor(cbcDecryption, new CryptoPP::StringSink(decryptedText));
+        stfDecryptor.Put(reinterpret_cast<const unsigned char *>( cipherText.c_str()), cipherText.size());
+        stfDecryptor.MessageEnd();
+    }
+    catch (std::exception &e)
+    {
+        return "";
+    }
 
     decryptedText.erase(decryptedText.end() - SALTSIZE - 1, decryptedText.end());
 
@@ -635,6 +642,7 @@ namespace PISSD
         std::string dataToRead[3];
         std::string temp[3];
         std::vector<std::string> possibleData;
+        bool carefulFlag = true;
 
         std::lock_guard<std::mutex> lock(*lgMutex);
 
@@ -643,22 +651,20 @@ namespace PISSD
         {
             if (compareCiphertext(dataToRead) > 1)
             {
-                for (int i = 0; i < 3; ++i)
+                carefulFlag = false;
+            }
+            for (int i = 0; i < 3; ++i)
+            {
+                temp[i] = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp[i]) == 0)
                 {
-                    temp[i] = decrypthData(dataKey, dataToRead[i]);
-                    if (checkHash(temp[i]) == 0)
+                    temp[i].erase(temp[i].end() - 90, temp[i].end());
+                    if (temp[i].substr(0, 3) == "str")
                     {
-                        temp[i].erase(temp[i].end() - 90, temp[i].end());
-                        if (temp[i].substr(0, 3) == "str")
-                        {
-                            temp[i].erase(0, 3);
-                            possibleData.push_back(temp[i]);
-                        }
+                        temp[i].erase(0, 3);
+                        possibleData.push_back(temp[i]);
                     }
                 }
-            } else
-            {
-
             }
         } else if (loadedFileCheck < 3)
         {
@@ -687,6 +693,11 @@ namespace PISSD
 
         data = findSameStrings(possibleData);
 
+        if (carefulFlag)
+        {
+            return 1;
+        }
+
         return 0;
     }
 
@@ -695,6 +706,7 @@ namespace PISSD
         std::string dataToRead[3];
         std::string temp[3];
         std::vector<std::string> possibleData;
+        bool carefulFlag = true;
 
         std::lock_guard<std::mutex> lock(*lgMutex);
 
@@ -703,22 +715,20 @@ namespace PISSD
         {
             if (compareCiphertext(dataToRead) > 1)
             {
-                for (int i = 0; i < 3; ++i)
+                carefulFlag = false;
+            }
+            for (int i = 0; i < 3; ++i)
+            {
+                temp[i] = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp[i]) == 0)
                 {
-                    temp[i] = decrypthData(dataKey, dataToRead[i]);
-                    if (checkHash(temp[i]) == 0)
+                    temp[i].erase(temp[i].end() - 90, temp[i].end());
+                    if (temp[i].substr(0, 3) == "dbl")
                     {
-                        temp[i].erase(temp[i].end() - 90, temp[i].end());
-                        if (temp[i].substr(0, 3) == "dbl")
-                        {
-                            temp[i].erase(0, 3);
-                            possibleData.push_back(temp[i]);
-                        }
+                        temp[i].erase(0, 3);
+                        possibleData.push_back(temp[i]);
                     }
                 }
-            } else
-            {
-
             }
         } else if (loadedFileCheck < 3)
         {
@@ -746,6 +756,11 @@ namespace PISSD
 
         data = std::stod(findSameStrings(possibleData));
 
+        if (carefulFlag)
+        {
+            return 1;
+        }
+
         return 0;
     }
 
@@ -754,6 +769,7 @@ namespace PISSD
         std::string dataToRead[3];
         std::string temp[3];
         std::vector<std::string> possibleData;
+        bool carefulFlag = true;
 
         std::lock_guard<std::mutex> lock(*lgMutex);
 
@@ -762,22 +778,20 @@ namespace PISSD
         {
             if (compareCiphertext(dataToRead) > 1)
             {
-                for (int i = 0; i < 3; ++i)
+                carefulFlag = false;
+            }
+            for (int i = 0; i < 3; ++i)
+            {
+                temp[i] = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp[i]) == 0)
                 {
-                    temp[i] = decrypthData(dataKey, dataToRead[i]);
-                    if (checkHash(temp[i]) == 0)
+                    temp[i].erase(temp[i].end() - 90, temp[i].end());
+                    if (temp[i].substr(0, 3) == "flt")
                     {
-                        temp[i].erase(temp[i].end() - 90, temp[i].end());
-                        if (temp[i].substr(0, 3) == "flt")
-                        {
-                            temp[i].erase(0, 3);
-                            possibleData.push_back(temp[i]);
-                        }
+                        temp[i].erase(0, 3);
+                        possibleData.push_back(temp[i]);
                     }
                 }
-            } else
-            {
-
             }
         } else if (loadedFileCheck < 3)
         {
@@ -805,6 +819,11 @@ namespace PISSD
 
         data = std::stof(findSameStrings(possibleData));
 
+        if (carefulFlag)
+        {
+            return 1;
+        }
+
         return 0;
     }
 
@@ -813,6 +832,7 @@ namespace PISSD
         std::string dataToRead[3];
         std::string temp[3];
         std::vector<std::string> possibleData;
+        bool carefulFlag = true;
 
         std::lock_guard<std::mutex> lock(*lgMutex);
 
@@ -821,22 +841,20 @@ namespace PISSD
         {
             if (compareCiphertext(dataToRead) > 1)
             {
-                for (int i = 0; i < 3; ++i)
+                carefulFlag = false;
+            }
+            for (int i = 0; i < 3; ++i)
+            {
+                temp[i] = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp[i]) == 0)
                 {
-                    temp[i] = decrypthData(dataKey, dataToRead[i]);
-                    if (checkHash(temp[i]) == 0)
+                    temp[i].erase(temp[i].end() - 90, temp[i].end());
+                    if (temp[i].substr(0, 3) == "int")
                     {
-                        temp[i].erase(temp[i].end() - 90, temp[i].end());
-                        if (temp[i].substr(0, 3) == "int")
-                        {
-                            temp[i].erase(0, 3);
-                            possibleData.push_back(temp[i]);
-                        }
+                        temp[i].erase(0, 3);
+                        possibleData.push_back(temp[i]);
                     }
                 }
-            } else
-            {
-
             }
         } else if (loadedFileCheck < 3)
         {
@@ -864,6 +882,11 @@ namespace PISSD
 
         data = std::stoll(findSameStrings(possibleData));
 
+        if (carefulFlag)
+        {
+            return 1;
+        }
+
         return 0;
     }
 
@@ -872,6 +895,7 @@ namespace PISSD
         std::string dataToRead[3];
         std::string temp[3];
         std::vector<std::string> possibleData;
+        bool carefulFlag = true;
 
         std::lock_guard<std::mutex> lock(*lgMutex);
 
@@ -880,22 +904,20 @@ namespace PISSD
         {
             if (compareCiphertext(dataToRead) > 1)
             {
-                for (int i = 0; i < 3; ++i)
+                carefulFlag = false;
+            }
+            for (int i = 0; i < 3; ++i)
+            {
+                temp[i] = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp[i]) == 0)
                 {
-                    temp[i] = decrypthData(dataKey, dataToRead[i]);
-                    if (checkHash(temp[i]) == 0)
+                    temp[i].erase(temp[i].end() - 90, temp[i].end());
+                    if (temp[i].substr(0, 3) == "bol")
                     {
-                        temp[i].erase(temp[i].end() - 90, temp[i].end());
-                        if (temp[i].substr(0, 3) == "bol")
-                        {
-                            temp[i].erase(0, 3);
-                            possibleData.push_back(temp[i]);
-                        }
+                        temp[i].erase(0, 3);
+                        possibleData.push_back(temp[i]);
                     }
                 }
-            } else
-            {
-
             }
         } else if (loadedFileCheck < 3)
         {
@@ -929,8 +951,14 @@ namespace PISSD
             data = false;
         } else
         {
+            return 2;
+        }
+
+        if (carefulFlag)
+        {
             return 1;
         }
+
 
         return 0;
     }
@@ -1401,6 +1429,7 @@ namespace PISSD
     {
         std::string dataToRead[3];
         std::vector<std::string> possibleData;
+        bool carefulFlag = true;
 
         std::lock_guard<std::mutex> lock(*lgMutex);
 
@@ -1409,23 +1438,21 @@ namespace PISSD
         {
             if (compareCiphertext(dataToRead) > 1)
             {
-                std::string temp[3];
-                for (int i = 0; i < 3; ++i)
+                carefulFlag = false;
+            }
+            std::string temp[3];
+            for (int i = 0; i < 3; ++i)
+            {
+                temp[i] = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp[i]) == 0)
                 {
-                    temp[i] = decrypthData(dataKey, dataToRead[i]);
-                    if (checkHash(temp[i]) == 0)
+                    temp[i].erase(temp[i].end() - 90, temp[i].end());
+                    if (temp[i].substr(0, 3) == "str")
                     {
-                        temp[i].erase(temp[i].end() - 90, temp[i].end());
-                        if (temp[i].substr(0, 3) == "str")
-                        {
-                            temp[i].erase(0, 3);
-                            possibleData.push_back(temp[i]);
-                        }
+                        temp[i].erase(0, 3);
+                        possibleData.push_back(temp[i]);
                     }
                 }
-            } else
-            {
-
             }
         } else if (loadedFileCheck < 3)
         {
@@ -1454,6 +1481,11 @@ namespace PISSD
 
         data = findSameStrings(possibleData);
 
+        if (carefulFlag)
+        {
+            return 1;
+        }
+
         return 0;
     }
 
@@ -1461,6 +1493,7 @@ namespace PISSD
     {
         std::string dataToRead[3];
         std::vector<std::string> possibleData;
+        bool carefulFlag = true;
 
         std::lock_guard<std::mutex> lock(*lgMutex);
 
@@ -1469,23 +1502,21 @@ namespace PISSD
         {
             if (compareCiphertext(dataToRead) > 1)
             {
-                std::string temp[3];
-                for (int i = 0; i < 3; ++i)
+                carefulFlag = false;
+            }
+            std::string temp[3];
+            for (int i = 0; i < 3; ++i)
+            {
+                temp[i] = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp[i]) == 0)
                 {
-                    temp[i] = decrypthData(dataKey, dataToRead[i]);
-                    if (checkHash(temp[i]) == 0)
+                    temp[i].erase(temp[i].end() - 90, temp[i].end());
+                    if (temp[i].substr(0, 3) == "dbl")
                     {
-                        temp[i].erase(temp[i].end() - 90, temp[i].end());
-                        if (temp[i].substr(0, 3) == "dbl")
-                        {
-                            temp[i].erase(0, 3);
-                            possibleData.push_back(temp[i]);
-                        }
+                        temp[i].erase(0, 3);
+                        possibleData.push_back(temp[i]);
                     }
                 }
-            } else
-            {
-
             }
         } else if (loadedFileCheck < 3)
         {
@@ -1512,6 +1543,12 @@ namespace PISSD
         }
 
         data = std::stod(findSameStrings(possibleData));
+
+        if (carefulFlag)
+        {
+            return 1;
+        }
+
         return 0;
     }
 
@@ -1519,6 +1556,7 @@ namespace PISSD
     {
         std::string dataToRead[3];
         std::vector<std::string> possibleData;
+        bool carefulFlag = true;
 
         std::lock_guard<std::mutex> lock(*lgMutex);
 
@@ -1527,23 +1565,19 @@ namespace PISSD
         {
             if (compareCiphertext(dataToRead) > 1)
             {
-                std::string temp[3];
-                for (int i = 0; i < 3; ++i)
-                {
-                    temp[i] = decrypthData(dataKey, dataToRead[i]);
-                    if (checkHash(temp[i]) == 0)
-                    {
-                        temp[i].erase(temp[i].end() - 90, temp[i].end());
-                        if (temp[i].substr(0, 3) == "flt")
-                        {
-                            temp[i].erase(0, 3);
-                            possibleData.push_back(temp[i]);
-                        }
+                carefulFlag = false;
+            }
+            std::string temp[3];
+            for (int i = 0; i < 3; ++i)
+            {
+                temp[i] = decrypthData(dataKey, dataToRead[i]);
+                if (checkHash(temp[i]) == 0) {
+                    temp[i].erase(temp[i].end() - 90, temp[i].end());
+                    if (temp[i].substr(0, 3) == "flt") {
+                        temp[i].erase(0, 3);
+                        possibleData.push_back(temp[i]);
                     }
                 }
-            } else
-            {
-
             }
         } else if (loadedFileCheck < 3)
         {
@@ -1570,6 +1604,12 @@ namespace PISSD
         }
 
         data = std::stof(findSameStrings(possibleData));
+
+        if (carefulFlag)
+        {
+            return 1;
+        }
+
         return 0;
     }
 
@@ -1577,6 +1617,7 @@ namespace PISSD
     {
         std::string dataToRead[3];
         std::vector<std::string> possibleData;
+        bool carefulFlag = true;
 
         std::lock_guard<std::mutex> lock(*lgMutex);
 
@@ -1585,6 +1626,8 @@ namespace PISSD
         {
             if (compareCiphertext(dataToRead) > 1)
             {
+                carefulFlag = false;
+            }
                 std::string temp[3];
                 for (int i = 0; i < 3; ++i)
                 {
@@ -1599,10 +1642,6 @@ namespace PISSD
                         }
                     }
                 }
-            } else
-            {
-
-            }
         } else if (loadedFileCheck < 3)
         {
             std::string temp;
@@ -1628,6 +1667,12 @@ namespace PISSD
         }
 
         data = std::stoll(findSameStrings(possibleData));
+
+        if (carefulFlag)
+        {
+            return 1;
+        }
+
         return 0;
     }
 
@@ -1635,6 +1680,7 @@ namespace PISSD
     {
         std::string dataToRead[3];
         std::vector<std::string> possibleData;
+        bool carefulFlag = true;
 
         std::lock_guard<std::mutex> lock(*lgMutex);
 
@@ -1643,6 +1689,8 @@ namespace PISSD
         {
             if (compareCiphertext(dataToRead) > 1)
             {
+                carefulFlag = false;
+            }
                 std::string temp[3];
                 for (int i = 0; i < 3; ++i)
                 {
@@ -1657,10 +1705,6 @@ namespace PISSD
                         }
                     }
                 }
-            } else
-            {
-
-            }
         } else if (loadedFileCheck < 3)
         {
             std::string temp;
@@ -1692,6 +1736,11 @@ namespace PISSD
         {
             data = false;
         } else
+        {
+            return 2;
+        }
+
+        if (carefulFlag)
         {
             return 1;
         }

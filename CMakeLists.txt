@@ -12,8 +12,6 @@ endif(WIN32)
 
 link_libraries(pthread)
 link_libraries(cryptopp)
-include_directories(cryptopp)
-link_directories(cryptopp)
 
 # List of source files
 set(libsrc PISSD.cpp PISSD.h)

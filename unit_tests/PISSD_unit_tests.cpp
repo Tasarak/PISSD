@@ -166,7 +166,7 @@ TEST_CASE("Delete Stored Data")
     }
 }
 
-TEST_CASE("Create a Remove Module")
+TEST_CASE("Create and Remove Module")
 {
     PISSD::SecureDataStorage secureDataStorage(&mutex);
 
@@ -257,7 +257,7 @@ TEST_CASE("Store/Retrieve Data to/from Module")
     secureDataStorage.removeModule(module);
 }
 
-TEST_CASE("Getting Keys")
+TEST_CASE("Get Keys")
 {
     PISSD::SecureDataStorage secureDataStorage(&mutex);
 
