@@ -1,3 +1,10 @@
+/**
+*  @file    PISSD.cpp
+*  @author  Jakub Klemens
+*  @date    14/05/2018
+*  @version 1.0
+*/
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -34,11 +41,16 @@
 #include <cryptopp/hex.h>
 #include <cryptopp/eax.h>
 
-#include "PISSD.h"
+#include "PISSD.hpp"
 
 
 #define SALTSIZE 32
 
+/**
+ * Hash a string
+ * @param aString is string to be hashed
+ * @return hash as string
+ */
 std::string SHA512HashString(std::string const aString)
 {
     std::string digest;
@@ -51,6 +63,11 @@ std::string SHA512HashString(std::string const aString)
     return digest;
 }
 
+/**
+ * Remove .jkl extension
+ * @param fileName is string to be striped
+ * @return string without extension
+ */
 std::string stripExtension(std::string fileName)
 {
     fileName.erase(0, 1);
@@ -58,6 +75,12 @@ std::string stripExtension(std::string fileName)
     return fileName;
 }
 
+/**
+ * Check if module is in a path
+ * @param filePath to be checked
+ * @param module to be checked
+ * @return true if module is in a path
+ */
 bool checkPath(std::string filePath, std::string module)
 {
     std::string delimiter = "/";
@@ -80,6 +103,10 @@ bool checkPath(std::string filePath, std::string module)
     return false;
 }
 
+/**
+ * Return username of active user
+ * @return usename as string
+ */
 std::string getUsername()
 {
 #ifdef WIN32
@@ -93,6 +120,10 @@ std::string getUsername()
 #endif
 }
 
+/**
+ * Find and create paths for PISSD folders
+ * @param pathNames is array of string contains path to folders
+ */
 void getDirPath(std::string pathNames[])
 {
 #ifdef WIN32
@@ -169,6 +200,11 @@ void getDirPath(std::string pathNames[])
 #endif
 }
 
+/**
+ * Create path with module
+ * @param module to be add
+ * @param paths where module should be add
+ */
 void addModuleToPath(std::string module, std::string paths[])
 {
     if (module.find('/') != 0)
@@ -186,6 +222,11 @@ void addModuleToPath(std::string module, std::string paths[])
     }
 }
 
+/**
+ * Saved data to file
+ * @param fileName is string
+ * @param data is string that will be saved
+ */
 void createFile(std::string fileName, std::string data)
 {
     std::string pathNames[3];
@@ -211,6 +252,12 @@ void createFile(std::string fileName, std::string data)
 #endif
 }
 
+/**
+ * Save data to file in module
+ * @param module where file will be stored
+ * @param fileName is string
+ * @param data is string that will be saved
+ */
 void createFile(std::string module, std::string fileName, std::string data)
 {
     std::string pathNames[3];
@@ -237,7 +284,10 @@ void createFile(std::string module, std::string fileName, std::string data)
 #endif
 }
 
-
+/**
+ * Return UUID of device
+ * @return UUID as string
+ */
 std::string getUUID()
 {
 #ifdef WIN32
@@ -276,6 +326,11 @@ std::string getUUID()
     return NULL;
 }
 
+/**
+ * Compare cipher text
+ * @param data is array containing data
+ * @return number of matches as int
+ */
 int compareCiphertext(std::string data[])
 {
     int equalCounter = 0;
@@ -299,6 +354,12 @@ int compareCiphertext(std::string data[])
     return equalCounter;
 }
 
+/**
+ * Open files and puts their content to data
+ * @param data array where data will be stored
+ * @param fileName is string
+ * @return non-zero value if there was a problem
+ */
 int loadFile(std::string data[], std::string fileName)
 {
     std::string dirPath[3];
@@ -339,6 +400,13 @@ int loadFile(std::string data[], std::string fileName)
     return 0;
 }
 
+/**
+ * Open files from module and puts their content to data
+ * @param module where file should exists
+ * @param data array where data will be stored
+ * @param fileName is string
+ * @return non-zero value if there was a problem
+ */
 int loadFile(std::string module, std::string data[], std::string fileName)
 {
     std::string dirPath[3];
@@ -380,6 +448,12 @@ int loadFile(std::string module, std::string data[], std::string fileName)
     return 0;
 }
 
+/**
+ * Create unique key and iv for each dataKey
+ * @param dataKey is string
+ * @param key is byte that will be initialized
+ * @param iv is byte that will be initialized
+ */
 void initializeKeyAndIV(const std::string &dataKey, CryptoPP::byte key[], CryptoPP::byte iv[])
 {
     CryptoPP::SecByteBlock derived(64);
@@ -395,6 +469,12 @@ void initializeKeyAndIV(const std::string &dataKey, CryptoPP::byte key[], Crypto
     memcpy(iv, derived.data() + CryptoPP::AES::MAX_KEYLENGTH, CryptoPP::AES::MAX_BLOCKSIZE);
 }
 
+/**
+ * Decrypth cipher text
+ * @param dataKey is string
+ * @param cipherText is string to be decrypted
+ * @return result of decryption as string
+ */
 std::string decrypthData(std::string dataKey, std::string cipherText)
 {
     CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_BLOCKSIZE];
@@ -423,6 +503,11 @@ std::string decrypthData(std::string dataKey, std::string cipherText)
 
 }
 
+/**
+ * Check if original hash is same as new one
+ * @param data to be checked
+ * @return non-zero value if error occurs
+ */
 int checkHash(std::string data)
 {
     if (data.size() < 90)
@@ -440,6 +525,11 @@ int checkHash(std::string data)
     return 0;
 }
 
+/**
+ * Find two same strings if they exist
+ * @param possibleData is vector of strings to be seek
+ * @return same strings, if no data are same, return empty string
+ */
 std::string findSameStrings(std::vector<std::string> possibleData)
 {
     if (possibleData.size() == 1)
@@ -460,6 +550,13 @@ std::string findSameStrings(std::vector<std::string> possibleData)
     return "";
 }
 
+/**
+ * Cipher plain text to cipher text by key and iv
+ * @param plaintext is string to be ciphered
+ * @param ciphertext is string with result of ciphering
+ * @param key is byte
+ * @param iv is byte
+ */
 void encryptData(std::string &plaintext, std::string &ciphertext, CryptoPP::byte key[], CryptoPP::byte iv[])
 {
     CryptoPP::AES::Encryption aesEncryption(key, CryptoPP::AES::MAX_KEYLENGTH);
@@ -470,6 +567,10 @@ void encryptData(std::string &plaintext, std::string &ciphertext, CryptoPP::byte
     stfEncryptor.MessageEnd();
 }
 
+/**
+ * Create random string that will be used as salt
+ * @param salt string containing result
+ */
 void generateSalt(std::string &salt)
 {
     CryptoPP::SecByteBlock saltGen(SALTSIZE);
@@ -479,6 +580,12 @@ void generateSalt(std::string &salt)
     salt = saltString;
 }
 
+/**
+ * Append file and module to path
+ * @param pathToDir is string
+ * @param module is string
+ * @param name is string
+ */
 void createPath(std::string &pathToDir, const std::string &module, const std::string &name)
 {
     if (module.front() == '/')
@@ -500,11 +607,21 @@ void createPath(std::string &pathToDir, const std::string &module, const std::st
 
 namespace PISSD
 {
+    /**
+     * Create instance of PISSD library
+     * @param mMutex is pointer to mutex
+     */
     SecureDataStorage::SecureDataStorage(std::mutex * mMutex)
     {
         lgMutex = mMutex;
     }
 
+    /**
+     * Store and cipher data
+     * @param dataKey is string containing key
+     * @param data is string to be stored
+     * @return non-zero value if error occurs
+     */
     int SecureDataStorage::storeData(const std::string &dataKey, std::string &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
@@ -529,6 +646,12 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Store and cipher data
+     * @param dataKey is string containing key
+     * @param data is double to be stored
+     * @return non-zero value if error occurs
+     */
     int SecureDataStorage::storeData(const std::string &dataKey, double &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
@@ -554,6 +677,12 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Store and cipher data
+     * @param dataKey is string containing key
+     * @param data is float to be stored
+     * @return non-zero value if error occurs
+     */
     int SecureDataStorage::storeData(const std::string &dataKey, float &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
@@ -579,6 +708,12 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Store and cipher data
+     * @param dataKey is string containing key
+     * @param data is int64 to be stored
+     * @return non-zero value if error occurs
+     */
     int SecureDataStorage::storeData(const std::string &dataKey, int64_t &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
@@ -604,6 +739,12 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Store and cipher data
+     * @param dataKey is string containing key
+     * @param data is bool to be stored
+     * @return non-zero value if error occurs
+     */
     int SecureDataStorage::storeData(const std::string &dataKey, bool &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
@@ -637,6 +778,12 @@ namespace PISSD
     }
 
 
+    /**
+     * Get stored data back and decipher it
+     * @param dataKey is string containing key
+     * @param data is variable where new data will be stored
+     * @return non-zero value, if error occurs
+     */
     int SecureDataStorage::retrieveData(const std::string &dataKey, std::string &data)
     {
         std::string dataToRead[3];
@@ -701,6 +848,12 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Get stored data back and decipher it
+     * @param dataKey is string containing key
+     * @param data is variable where new data will be stored
+     * @return non-zero value, if error occurs
+     */
     int SecureDataStorage::retrieveData(const std::string &dataKey, double &data)
     {
         std::string dataToRead[3];
@@ -764,6 +917,12 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Get stored data back and decipher it
+     * @param dataKey is string containing key
+     * @param data is variable where new data will be stored
+     * @return non-zero value, if error occurs
+     */
     int SecureDataStorage::retrieveData(const std::string &dataKey, float &data)
     {
         std::string dataToRead[3];
@@ -827,6 +986,12 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Get stored data back and decipher it
+     * @param dataKey is string containing key
+     * @param data is variable where new data will be stored
+     * @return non-zero value, if error occurs
+     */
     int SecureDataStorage::retrieveData(const std::string &dataKey, int64_t &data)
     {
         std::string dataToRead[3];
@@ -890,6 +1055,12 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Get stored data back and decipher it
+     * @param dataKey is string containing key
+     * @param data is variable where new data will be stored
+     * @return non-zero value, if error occurs
+     */
     int SecureDataStorage::retrieveData(const std::string &dataKey, bool &data)
     {
         std::string dataToRead[3];
@@ -963,6 +1134,10 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Delete data by dataKey
+     * @param dataKey is name of data that will be removed
+     */
     void SecureDataStorage::deleteStoredData(std::string &dataKey)
     {
         std::string pathsToFile[3];
@@ -981,6 +1156,9 @@ namespace PISSD
         }
     }
 
+    /**
+     * Remove all stored data including root folder
+     */
     void SecureDataStorage::deleteAllData()
     {
         boost::filesystem::path boostPath;
@@ -995,6 +1173,12 @@ namespace PISSD
         }
     }
 
+    /**
+     * Create module on desired path
+     * @param path is string where module should be created
+     * @param name is name of module as string
+     * @return non-zero value if error occurs
+     */
     int SecureDataStorage::createModule(const std::string &path, const std::string &name)
     {
         std::string dirPath[3];
@@ -1042,6 +1226,11 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Removed desired module
+     * @param path is path to module as string
+     * @return non-zero value if error occurs
+     */
     int SecureDataStorage::removeModule(const std::string &path)
     {
         boost::filesystem::path boostPath;
@@ -1057,6 +1246,10 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Remove all data in module including sub-modules
+     * @param path is path to module as string
+     */
     void SecureDataStorage::deleteAllDataFromModule(std::string &path)
     {
         boost::filesystem::path boostPath;
@@ -1071,6 +1264,11 @@ namespace PISSD
         }
     }
 
+    /**
+     * Find all keys
+     * @param paths paths to data keys as vector of strings
+     * @param keys name of keys as vector of strings
+     */
     void SecureDataStorage::getAllKeys(std::vector<std::string> &paths, std::vector<std::string> &keys)
     {
         std::string dirPath[3];
@@ -1122,6 +1320,10 @@ namespace PISSD
         keys = lKeys[max];
     }
 
+    /**
+     * Find all modules
+     * @param modules path to all modules as vector of strings
+     */
     void SecureDataStorage::getAllModules(std::vector<std::string> &modules)
     {
         std::string dirPath[3];
@@ -1147,6 +1349,11 @@ namespace PISSD
         modules.erase(std::unique(modules.begin(), modules.end()), modules.end());
     }
 
+    /**
+     * Find all submodules in module
+     * @param path is where should be sought
+     * @param modules is path to sub-modules as vector of strings
+     */
     void SecureDataStorage::getAllSubmodules(std::string path, std::vector<std::string> &modules)
     {
         std::string dirPath[3];
@@ -1173,6 +1380,11 @@ namespace PISSD
         }
     }
 
+    /**
+     * Check if key exists
+     * @param dataKey to be checked as string
+     * @return true, if key exists
+     */
     bool SecureDataStorage::contains(const std::string &dataKey)
     {
         std::vector<std::string> paths, keys;
@@ -1189,6 +1401,12 @@ namespace PISSD
         return false;
     }
 
+    /**
+     * Find all keys in module and its sub-modules
+     * @param module is path to module as string
+     * @param paths is paths to keys as vector of strings
+     * @param keys is name of keys as vector of strings
+     */
     void SecureDataStorage::getAllKeysFromModule(std::string module,
                                                  std::vector<std::string> &paths,
                                                  std::vector<std::string> &keys)
@@ -1245,6 +1463,12 @@ namespace PISSD
         keys = lKeys[max];
     }
 
+    /**
+     * Find all keys in module
+     * @param module is path to module as string
+     * @param paths is paths to keys as vector of strings
+     * @param keys is name of keys as vector of strings
+     */
     void SecureDataStorage::getDirectKeysFromModule(std::string module,
                                                     std::vector<std::string> &paths,
                                                     std::vector<std::string> &keys)
@@ -1302,6 +1526,13 @@ namespace PISSD
         keys = lKeys[max];
     }
 
+    /**
+     * Store and cipher data to module
+     * @param module is string containing path to module
+     * @param dataKey is string containing key
+     * @param data is string to be stored
+     * @return non-zero value if error occurs
+     */
     int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, std::string &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
@@ -1325,6 +1556,13 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Store and cipher data to module
+     * @param module is string containing path to module
+     * @param dataKey is string containing key
+     * @param data is double to be stored
+     * @return non-zero value if error occurs
+     */
     int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, double &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
@@ -1349,6 +1587,13 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Store and cipher data to module
+     * @param module is string containing path to module
+     * @param dataKey is string containing key
+     * @param data is float to be stored
+     * @return non-zero value if error occurs
+     */
     int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, float &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
@@ -1372,6 +1617,13 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Store and cipher data to module
+     * @param module is string containing path to module
+     * @param dataKey is string containing key
+     * @param data is int64 to be stored
+     * @return non-zero value if error occurs
+     */
     int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, int64_t &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
@@ -1395,6 +1647,13 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Store and cipher data to module
+     * @param module is string containing path to module
+     * @param dataKey is string containing key
+     * @param data is bool to be stored
+     * @return non-zero value if error occurs
+     */
     int SecureDataStorage::storeDataToModule(std::string module, const std::string &dataKey, bool &data)
     {
         CryptoPP::byte key[CryptoPP::AES::MAX_KEYLENGTH], iv[CryptoPP::AES::MAX_KEYLENGTH];
@@ -1425,6 +1684,13 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Get stored data back from module and decipher it
+     * @param module is string containing path to module
+     * @param dataKey is string containing key
+     * @param data is variable where new data will be stored
+     * @return non-zero value, if error occurs
+     */
     int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, std::string &data)
     {
         std::string dataToRead[3];
@@ -1489,6 +1755,13 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Get stored data back from module and decipher it
+     * @param module is string containing path to module
+     * @param dataKey is string containing key
+     * @param data is variable where new data will be stored
+     * @return non-zero value, if error occurs
+     */
     int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, double &data)
     {
         std::string dataToRead[3];
@@ -1552,6 +1825,13 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Get stored data back from module and decipher it
+     * @param module is string containing path to module
+     * @param dataKey is string containing key
+     * @param data is variable where new data will be stored
+     * @return non-zero value, if error occurs
+     */
     int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, float &data)
     {
         std::string dataToRead[3];
@@ -1613,6 +1893,13 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Get stored data back from module and decipher it
+     * @param module is string containing path to module
+     * @param dataKey is string containing key
+     * @param data is variable where new data will be stored
+     * @return non-zero value, if error occurs
+     */
     int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, int64_t &data)
     {
         std::string dataToRead[3];
@@ -1676,6 +1963,13 @@ namespace PISSD
         return 0;
     }
 
+    /**
+     * Get stored data back from module and decipher it
+     * @param module is string containing path to module
+     * @param dataKey is string containing key
+     * @param data is variable where new data will be stored
+     * @return non-zero value, if error occurs
+     */
     int SecureDataStorage::retrieveDataFromModule(std::string module, const std::string &dataKey, bool &data)
     {
         std::string dataToRead[3];

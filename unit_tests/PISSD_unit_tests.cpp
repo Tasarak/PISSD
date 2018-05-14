@@ -1,3 +1,9 @@
+/**
+*  @file    PISSD_unit_tests.cpp
+*  @author  Jakub Klemens
+*  @date    14/05/2018
+*  @version 1.0
+*/
 #include <iostream>
 #include <algorithm>
 #include <vector>
@@ -10,7 +16,7 @@
 #include <Shlwapi.h>
 #endif
 
-#include "../PISSD.h"
+#include "../PISSD.hpp"
 #define CATCH_CONFIG_MAIN
 #include "catch/catch.hpp"
 
